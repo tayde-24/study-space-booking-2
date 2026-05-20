@@ -3,38 +3,38 @@ import prisma from './utils/prisma.js';
 async function seed() {
   try {
     // Create some users
-    const user1 = await prisma.user.create({
-      data: {
-        name: 'John Doe',
-        email: 'john@example.com'
-      }
-    });
+    // const user4 = await prisma.user.create({
+    //   data: {
+    //     name: 'Katy Luevano',
+    //     email: 'katy_luevano@example.com'
+    //   }
+    // });
 
-    const user2 = await prisma.user.create({
-      data: {
-        name: 'Jane Smith',
-        email: 'jane@example.com'
-      }
-    });
+    // const user5 = await prisma.user.create({
+    //   data: {
+    //     name: 'Cristy Euan',
+    //     email: 'cristy_euan@example.com'
+    //   }
+    // });
 
     // Create some rooms
-    const room1 = await prisma.room.create({
+    const room4 = await prisma.room.create({
       data: {
-        name: 'Conference Room A',
-        capacity: 10
+        name: 'Luke Skywalker Room 1B',
+        capacity: 6
       }
     });
 
-    const room2 = await prisma.room.create({
+    const room5 = await prisma.room.create({
       data: {
-        name: 'Study Room B',
-        capacity: 4
+        name: 'Franco Escamilla Room 2A',
+        capacity: 8
       }
     });
 
     console.log('Database seeded successfully!');
-    console.log('Users:', user1, user2);
-    console.log('Rooms:', room1, room2);
+    console.log('Users:', user4, user5);
+    console.log('Rooms:', room4, room5);
 
   } catch (error) {
     console.error('Error seeding database:', error);

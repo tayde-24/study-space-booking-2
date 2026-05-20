@@ -3,8 +3,17 @@ POST http://localhost:3000/bookings HTTP/1.1
 content-Type: application/json
 
 {
-"userId": 1, "roomId": 1, "startTime": "2024-07-01T10:00:00", "endTime": "2024-07-01T12:00:00"
+"userId": 3, 
+"roomId": 4, 
+"startTime": "2024-07-01T09:00:00", 
+"endTime": "2024-07-01T09:30:00"
 }
 
 ### 
 GET http://localhost:3000/rooms HTTP/1.1
+
+
+ const logout = async () => {
+  await fetch("http://localhost:3001/auth/logout", {
+    credentials: "include"
+  })

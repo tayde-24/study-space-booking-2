@@ -38,8 +38,8 @@ router.post('/', async (req, res) => {
 
         const booking = await prisma.booking.create({
             data: {
-                userId,
-                roomId,
+                userId: req.user.id,
+                roomId: req.body.roomId,
                 startTime: new Date(startTime),
                 endTime: new Date(endTime)
             }
@@ -55,6 +55,60 @@ router.post('/', async (req, res) => {
             error: error.message 
         })
     }
+});
+
+router.get('/', async (req, res) => {
+    try {
+        const bookings = await prisma.booking.findMany();
+        res.json(bookings);
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        res.status(500).json({ error: "Failed to fetch bookings" });
+    }
+});
+
+// router.get('/me', async (req, res) => {
+//     try {
+//         if (!req.user) {
+//             return res.status(401).json({ error: "Unauthorized" });
+//         }
+
+//         const bookings = await prisma.booking.findMany({
+//             where: {
+//                 userId: req.user.id
+//             },
+//             orderBy: {
+//                 startTime: 'asc'
+//             }
+//         });
+//         res.json(bookings);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: "Failed to fetch user bookings" });
+//     } 
+// });
+router.get("/me", (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" })
+  }
+
+  prisma.booking.findMany({
+    where: {
+      userId: req.user.id
+    },
+    include: {
+      room: true
+    },
+    orderBy: {
+      startTime: 'asc'
+    },
+  })
+  .then(bookings => res.json(bookings))
+  .catch(err => {
+    console.error(err)
+    res.status(500).json({ error: "Failed to fetch user bookings" })
+  })
+  console.log("req.user:", req.user)
 });
 
 export default router;

@@ -1,0 +1,137 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+
+export default function DashboardPage() {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [bookings, setBookings] = useState([])
+
+  const router = useRouter()
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+
+        const res = await fetch(
+          "http://localhost:3001/auth/me",
+          {
+            credentials: "include"
+          }
+        )
+        
+
+        const data = await res.json()
+        console.log("Auth user:", data);
+
+        // IMPORTANT FIX:
+        if (!data || !data.user) {
+          router.push("/login")
+          return
+        }
+        const actualUser = data?.user ?? data;
+
+        setUser(actualUser)
+      } catch (err) {
+        console.error(err)
+        router.push("/login")
+      } finally {
+        setLoading(false)
+      }
+      
+    }
+
+    checkAuth()
+  }, [])
+
+useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:3001/bookings/me",
+          {
+            credentials: "include"
+          }
+        )
+
+        const data = await res.json()
+        console.log("Bookings:", data)
+
+        setBookings(data)
+      } catch (error) {
+        console.error("Error fetching bookings:", error)
+      }
+    }
+
+    fetchBookings()
+  }, [])
+  
+  const logout = async () => {
+            await fetch("http://localhost:3001/auth/logout", {
+            credentials: "include"
+        })
+
+        setUser(null);
+        router.push("/login");
+        
+    }
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (!user) {
+    return <div>Redirecting...</div>
+  }
+
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl font-bold">
+        Dashboard
+      </h1>
+
+      <p>Welcome, {user.name}</p>
+      <p>{user.email}</p>
+      <button
+      onClick={logout}
+      className="mt-4 rounded-lg bg-red-500 px-4 py-2 text-white"
+    >
+      Logout
+    </button>
+    <h2 className="text-xl font-bold">Your Bookings</h2>
+
+    {bookings.length === 0 ? (
+        <p>No bookings yet</p>
+            ) : (
+            bookings.map((b) => (
+        <div
+            key={b.id}
+            className="border p-3 rounded mt-2"
+        >
+        <p className="font-semibold">Room: {b.room?.name}</p>
+        <p>
+            {
+            new Date(b.startTime).toLocaleString("en-US", {
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            })}
+            {" → "}
+            {
+            new Date(b.endTime).toLocaleString("en-US", {
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            })}
+        </p>
+      </div>
+    ))
+  )}
+    </div>
+  )
+}
