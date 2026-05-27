@@ -16,8 +16,10 @@ datasource db {
 
 model User {
   id       Int       @id @default(autoincrement())
-  name     String
+  googleId String    @unique
   email    String    @unique
+  name     String
+  
   bookings Booking[]
 }
 

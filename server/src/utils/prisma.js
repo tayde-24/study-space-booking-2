@@ -13,6 +13,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.mts";
 
 const base = process.env.DATABASE_URL;
+// const base = process.env.DIRECT_URL;
 const connectionString = base.includes("sslmode=") ? base : `${base}?sslmode=require`;
 
 const adapter = new PrismaPg({ connectionString });
