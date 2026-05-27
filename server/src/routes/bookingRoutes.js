@@ -31,15 +31,35 @@ router.post('/', async (req, res) => {
         })
 
         if (conflict) {
-            return res.status(400).json({
+            return res.status(409).json({
                 error: "Time slot is already booked"
             })
         }
 
+        // Validate dates
+        const start = new Date(startTime)
+        const end = new Date(endTime)
+        if (
+            isNaN(start.getTime()) ||
+            isNaN(end.getTime())
+        ) {
+            return res.status(400).json({
+                error: "Invalid date format"
+            })
+        }
+
+        // Prevents backwards bookings
+        if (startTime >= endTime) {
+            return res.status(400).json({
+                error: "Start time must be before end time"
+            })
+        }
+
+        // Creates the booking
         const booking = await prisma.booking.create({
             data: {
                 userId: req.user.id,
-                roomId: req.body.roomId,
+                roomId: Number(roomId),
                 startTime: new Date(startTime),
                 endTime: new Date(endTime)
             }

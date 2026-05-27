@@ -6,7 +6,8 @@ const router = express.Router();
 router.get (
     '/google',
     passport.authenticate('google', {
-        scope: ['profile', 'email']
+        scope: ['profile', 'email'],
+        prompt: 'select_account'
     })
 )
 
@@ -31,6 +32,19 @@ router.get('/logout', (req, res) => {
     req.logout(() => {
         res.json({ message: 'Logged out successfully' });
     });
+    req.logout((err) => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.status(500).json({ error: 'Logout failed' });
+        }
+    });
+
+    //This code below destroys cookie and session.
+
+    // req.session.destroy(() => {
+    //     res.clearCookie('connect.sid');
+    //     res.json({ message: 'Logged out successfully' });
+    // });
 });
 
 export default router;
