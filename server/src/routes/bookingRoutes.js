@@ -87,6 +87,30 @@ router.get('/', async (req, res) => {
     }
 });
 
+//Maybe add user booking
+
+router.get('/room/:roomId', async (req, res) => {
+    try {
+        const roomId = Number(req.params.roomId);
+
+        const bookings = await prisma.booking.findMany({
+            where: {
+                roomId: roomId
+            },
+            orderBy: {
+                startTime: 'asc'
+            }
+        });
+
+        console.log(`Bookings for room ${roomId}:`, bookings);
+        //console.log(bookings);
+        res.json(bookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch bookings for room" });
+    }
+})
+
 // router.get('/me', async (req, res) => {
 //     try {
 //         if (!req.user) {
@@ -129,6 +153,27 @@ router.get("/me", (req, res) => {
     res.status(500).json({ error: "Failed to fetch user bookings" })
   })
   console.log("req.user:", req.user)
+});
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const bookingId = Number(req.params.id);
+
+        await prisma.booking.delete({
+            where: {
+                id: bookingId
+            }
+        })
+
+        res.json({
+            message: "Booking deleted successfully"
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: "Failed to delete booking"   
+        })
+    }
 });
 
 export default router;

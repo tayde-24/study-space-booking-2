@@ -5,6 +5,10 @@ import api from "@/lib/api";
 export default function BookingForm() {
     const [message, setMessage] = useState("");
     //added more down here
+    const [bookings, setBookings] = useState([]);
+    const [buildings, setBuildings] = useState([]);
+    const [selectedBuilding, setSelectedBuilding] = useState("");
+    const [selectedRoom, setSelectedRoom] = useState("");
     const [roomId, setRoomId] = useState("");
     const [rooms, setRooms] = useState("");
     const [startTime, setStartTime] = useState("");
@@ -23,7 +27,7 @@ export default function BookingForm() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          roomId,
+          roomId: Number(selectedRoom),
           startTime,
           endTime
         })
@@ -42,6 +46,29 @@ export default function BookingForm() {
   }
 
   useEffect(() => {
+    const fetchBuildings = async () => {
+      try {
+        const res = await api.get("/buildings")
+        setBuildings(res.data)
+      } catch (error) {
+        console.error(error);
+      }
+      }
+    fetchBuildings()
+    }, []);
+
+    //Update rooms when building changes
+    const handleBuildingChange = async (e) => {
+      const buildingId = e.target.value;
+      setSelectedBuilding(buildingId);
+      const building = buildings.find(b => b.id === Number(buildingId));
+      setRooms(building?.rooms || []);
+      setSelectedRoom(""); // Reset selected room
+    };
+
+    //Submit booking
+
+  useEffect(() => {
     const fetchRooms = async () => {
       try {
         const res = await fetch(
@@ -58,8 +85,58 @@ export default function BookingForm() {
     }
 
     fetchRooms()
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    if(!selectedRoom) {
+      setBookings([]);
+      return;
+    }
+
+    const fetchBookings = async () => {
+      try {
+        const res = await api.get(`/bookings/room/${selectedRoom}`);
+        setBookings(res.data);
+
+      } catch (error) {
+        console.error(error);
+      }
+  }
+    fetchBookings();
+}, [selectedRoom]);
+
+const formatDate = (date) => {
+
+    if (!date) {
+        return "No Date";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (isNaN(parsedDate.getTime())) {
+        return "Invalid Date";
+    }
+
+    return parsedDate.toLocaleString("en-US", {
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    });
+};
         
+// const formatDate = (date) => {
+//     return new Date(date).toLocaleString(
+//         "en-US",
+//         {
+//           dateStyle: "medium",
+//           timeStyle: "short"
+//         }
+//     );
+// }
+
+
 
     // const handleBooking = async () => {
     //     try {
@@ -81,60 +158,221 @@ export default function BookingForm() {
     // }    
 
 
-return (
-    // <div className="mt-6">
-    //     <button onClick={handleBooking} className="bg-black text-white px-4 py-2 rounded-lg">
-    //         Book Room 
-    //     </button>
-    //     {message && <p className="mt-2 text-red-500">{message}</p>}
-    // </div>
-    <form
-      onSubmit={handleBooking}
-      className="p-8 flex flex-col gap-4"
-    >
-      {/* <input
-        type=""
-        placeholder="Room ID"
-        value={roomId}
-        onChange={(e) => setRoomId(e.target.value)}
-        className="border p-2"
-      /> */}
+// return (
+//     // <div className="mt-6">
+//     //     <button onClick={handleBooking} className="bg-black text-white px-4 py-2 rounded-lg">
+//     //         Book Room 
+//     //     </button>
+//     //     {message && <p className="mt-2 text-red-500">{message}</p>}
+//     // </div>
 
-      <select
-        value={roomId}
-        onChange={(e) => setRoomId(Number(e.target.value))}
-        className="border p-2"
-      >
-        <option value="">Select Room</option>
-        {Array.isArray(rooms) && rooms.map((room) => (
-            <option 
-                key={room.id} 
-                value={room.id}> 
-                    {room.name}
+//     <form
+//       onSubmit={handleBooking}
+//       className="p-8 flex flex-col gap-4"
+//     >
+//       {/* <input
+//         type=""
+//         placeholder="Room ID"
+//         value={roomId}
+//         onChange={(e) => setRoomId(e.target.value)}
+//         className="border p-2"
+//       /> */}
+
+//       <select
+//         value={roomId}
+//         onChange={(e) => setRoomId(Number(e.target.value))}
+//         className="border p-2"
+//       >
+//         <option value="">Select Room</option>
+//         {Array.isArray(rooms) && rooms.map((room) => (
+//             <option 
+//                 key={room.id} 
+//                 value={room.id}> 
+//                     {room.name}
+//             </option>
+//         ))}
+//         </select>
+
+//       <input
+//         type="datetime-local"
+//         value={startTime}
+//         onChange={(e) => setStartTime(e.target.value)}
+//         className="border p-2"
+//       />
+
+//       <input
+//         type="datetime-local"
+//         value={endTime}
+//         onChange={(e) => setEndTime(e.target.value)}
+//         className="border p-2"
+//       />
+
+//       <button
+//         type="submit"
+//         className="bg-blue-500 text-white p-2 rounded"
+//       >
+//         Book Room
+//       </button>
+//     </form>
+// )
+
+return (<div className="space-y-6 max-w-xl">
+
+      {/* Building */}
+      <div>
+
+        <label className="block mb-2 font-semibold">
+          Building
+        </label>
+
+        <select
+          value={selectedBuilding}
+          onChange={handleBuildingChange}
+          className="border rounded-lg p-2 w-full"
+        >
+
+          <option value="">
+            Select Building
+          </option>
+
+          {buildings.map((building) => (
+
+            <option
+              key={building.id}
+              value={building.id}
+            >
+              {building.name}
             </option>
-        ))}
+
+          ))}
+
         </select>
 
-      <input
-        type="datetime-local"
-        value={startTime}
-        onChange={(e) => setStartTime(e.target.value)}
-        className="border p-2"
-      />
+      </div>
 
-      <input
-        type="datetime-local"
-        value={endTime}
-        onChange={(e) => setEndTime(e.target.value)}
-        className="border p-2"
-      />
+      {/* Room */}
+      <div>
 
+        <label className="block mb-2 font-semibold">
+          Room
+        </label>
+
+        <select
+          value={selectedRoom}
+          onChange={(e) =>
+            setSelectedRoom(e.target.value)
+          }
+          className="border rounded-lg p-2 w-full"
+          disabled={!selectedBuilding}
+        >
+
+          <option value="">
+            Select Room
+          </option>
+
+          {Array.isArray(rooms) && rooms.map((room) => (
+
+            <option
+              key={room.id}
+              value={room.id}
+            >
+              {room.name}
+            </option>
+
+          ))}
+
+        </select>
+
+      </div>
+
+      {/* Start Time */}
+      <div>
+
+        <label className="block mb-2 font-semibold">
+          Start Time
+        </label>
+
+        <input
+          type="datetime-local"
+          value={startTime}
+          onChange={(e) =>
+            setStartTime(e.target.value)
+          }
+          className="border rounded-lg p-2 w-full"
+        />
+
+      </div>
+
+      {/* End Time */}
+      <div>
+
+        <label className="block mb-2 font-semibold">
+          End Time
+        </label>
+
+        <input
+          type="datetime-local"
+          value={endTime}
+          onChange={(e) =>
+            setEndTime(e.target.value)
+          }
+          className="border rounded-lg p-2 w-full"
+        />
+
+      </div>
+
+      {/* Submit */}
       <button
-        type="submit"
-        className="bg-blue-500 text-white p-2 rounded"
+        onClick={handleBooking}
+        className="bg-black text-white px-4 py-2 rounded-xl"
       >
-        Book Room
+        Reserve Room
       </button>
-    </form>
-)
+
+      {/* Message */}
+      {message && (
+        <p className="font-medium">
+          {message}
+        </p>
+      )}
+
+
+
+  <h2 className="font-bold text-lg mb-3">
+    Existing Reservations
+  </h2>
+
+  {bookings.length === 0 ? (
+    <p>No reservations found.</p>
+  ) : (
+    bookings.map((booking) => (
+      <div
+        key={booking.id}
+        className="border-b py-2"
+      >
+        <div>
+          Start:
+          {" "}
+          {new Date(
+            booking.startTime
+          ).toLocaleString()}
+        </div>
+
+        <div>
+          End:
+          {" "}
+          {new Date(
+            booking.endTime
+          ).toLocaleString()}
+        </div>
+      </div>
+    ))
+  )}
+
+  <div>
+    <p> Start: {formatDate(bookings[0]?.startTime)}</p>  
+    <p>End: {formatDate(bookings[0]?.endTime)}</p>
+  </div>
+</div>
+  )
 }
