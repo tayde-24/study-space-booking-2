@@ -74,4 +74,4 @@ passport.deserializeUser(
   }
 )
 
-export default passport
+export default passport;

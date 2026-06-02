@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
@@ -77,6 +78,24 @@ useEffect(() => {
         
     }
 
+    const handleCancelBooking = async (bookingId) => {
+
+      const confirmed = window.confirm("Are you sure you want to cancel this booking?")
+      if (!confirmed) return;
+
+      try {
+        await fetch(`http://localhost:3001/bookings/${bookingId}`, {
+        // await api.delete(`http://localhost:3001/bookings/${bookingId}`, {
+          method: "DELETE",
+          credentials: "include"
+        })
+        setBookings(bookings.filter(b => b.id !== bookingId))
+
+      } catch (error) {
+        console.error("Error canceling booking:", error)
+      }
+    }
+
   if (loading) {
     return <div>Loading...</div>
   }
@@ -87,10 +106,13 @@ useEffect(() => {
 
   return (
     <div className="p-8">
+
       <h1 className="text-2xl font-bold">
         Dashboard
       </h1>
-
+      <Link href="/" className="underline text-blue-600">
+        Back to Home
+      </Link>
       <p>Welcome, {user.name}</p>
       <p>{user.email}</p>
       <button
@@ -129,6 +151,11 @@ useEffect(() => {
                 hour12: true
             })}
         </p>
+
+        <button onClick={handleCancelBooking.bind(null, b.id)}
+        className="mt-2 rounded-lg bg-red-500 px-3 py-1 text-white">
+          Cancel Reservation
+        </button>
       </div>
     ))
   )}
