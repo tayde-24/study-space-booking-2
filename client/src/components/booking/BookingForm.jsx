@@ -13,6 +13,8 @@ export default function BookingForm() {
     const [rooms, setRooms] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
+    const [roomStatuses, setRoomStatuses] = useState([]);
+    const [availability, setAvailability] = useState([]);
 
     const handleBooking = async (e) => {
     e.preventDefault()
@@ -75,7 +77,7 @@ export default function BookingForm() {
             "http://localhost:3001/rooms"
         )
         const data = await res.json();
-        console.log("Rooms:", data);
+        //console.log("Rooms:", data);
         setRooms(Array.isArray(data) ? data: data.rooms || [])
         
       } catch (error) {
@@ -125,6 +127,43 @@ const formatDate = (date) => {
         hour12: true
     });
 };
+
+useEffect(() => {
+  if (!startTime || !endTime) {
+    //  setRoomStatuses([]);
+     setAvailability([]);
+    return;
+  }
+  const fetchAvailability = async () => {
+    try {
+      const res = await api.get(
+        `/rooms/availability`,
+        {
+          params: {
+            startTime,
+            endTime
+        }
+      }
+      );
+      console.log("Availability:", res.data);
+      setAvailability(Array.isArray(res.data) ? res.data : res.data.rooms || []);
+      //  setRoomStatuses(res.data);
+    } catch (error) {
+      console.error("Error fetching room availability:", error);
+    }
+  }
+  fetchAvailability();
+
+  console.log("startTime:", startTime)
+console.log("endTime:", endTime)
+      
+}, [startTime, endTime]);
+
+const isRoomAvailable = (roomId) => {
+  const room = availability.find(room => room.id === Number(roomId));
+  
+  return room?.available ?? true;
+}
         
 // const formatDate = (date) => {
 //     return new Date(date).toLocaleString(
@@ -216,6 +255,20 @@ const formatDate = (date) => {
 //     </form>
 // )
 
+useEffect(() => {
+  const fetchAvailability = async () => {
+    try {
+      const res = await api.get(`/rooms/availability`);
+      // setRoomStatuses(res.data);
+      setAvailability(Array.isArray(res.data) ? res.data : res.data.rooms || []);
+        console.log("Availability:", res.data);
+    } catch (error) {
+      console.error("Error fetching room availability:", error);
+    }
+  }
+  fetchAvailability();
+}, []);
+
 return (<div className="space-y-6 max-w-xl">
 
       {/* Building */}
@@ -275,11 +328,17 @@ return (<div className="space-y-6 max-w-xl">
             <option
               key={room.id}
               value={room.id}
+              disabled={!isRoomAvailable(room.id)}
             >
               {room.name}
+              {" "}
+              {isRoomAvailable(room.id)
+                ? "🟢 (Available)"
+                : "🔴 (Unavailable)"}
             </option>
 
           ))}
+          
 
         </select>
 
@@ -373,6 +432,37 @@ return (<div className="space-y-6 max-w-xl">
     <p> Start: {formatDate(bookings[0]?.startTime)}</p>  
     <p>End: {formatDate(bookings[0]?.endTime)}</p>
   </div>
+
+  {roomStatuses.map(room => (
+    <div key={room.id}
+    className="border p-3 rounded mt-2">
+    <div>
+      <div>{room.name}</div>
+      <div className="text-sm text-gray-500">
+        {room.building}
+      </div>
+    </div>
+    
+    <div>
+      {room.occupied ? "🔴 Occupied"
+          : "🟢 Available"}
+    </div>
+    </div>
+  ))}
+
+  {availability.map(room => (
+          <div key={room.id}
+            className="border p-3 rounded mt-2">
+          <div>
+          <strong>{room.name}</strong>
+          <div className="text-sm text-gray-500">
+          {room.available ? "🟢 Available"
+          : "🔴 Unavailable"}
+      </div>
+    </div>
+    </div>
+  ))}
+  
 </div>
   )
 }
