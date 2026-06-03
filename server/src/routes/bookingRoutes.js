@@ -155,6 +155,30 @@ router.get("/me", (req, res) => {
   console.log("req.user:", req.user)
 });
 
+// For when the user wants to view the schedule of a room without booking
+router.get('/schedule/:roomId', async (req, res) => {
+    try {
+        const roomId = Number(req.params.roomId);
+        const bookings = await prisma.booking.findMany({
+            where: {
+                roomId: roomId
+            },
+            orderBy: {
+                startTime: 'asc'    
+            }
+        });
+
+        res.json(bookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch room schedule" });
+    }
+    
+});
+
+
+
+// For when the user wants to cancel a booking
 router.delete('/:id', async (req, res) => {
     try {
         const bookingId = Number(req.params.id);

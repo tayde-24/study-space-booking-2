@@ -15,6 +15,29 @@ export default function BookingForm() {
     const [endTime, setEndTime] = useState("");
     const [roomStatuses, setRoomStatuses] = useState([]);
     const [availability, setAvailability] = useState([]);
+    const [schedule, setSchedule] = useState([]);
+    
+    
+    //const hours = [];
+
+    // for (let hour = 8; hour <= 22; hour++) {
+    //   hours.push(hour);
+    // }
+    const hours = Array.from(
+      { length: 15 },
+      (_, i) => i + 8
+    );
+
+    const isHourBooked = (hour) => {
+      return schedule.some(booking => {
+        const start = new Date(booking.startTime).getHours();
+        const end = new Date(booking.endTime).getHours();
+
+        return hour >= start && hour < end;
+      })
+    }
+
+    const currentHour = new Date().getHours(); 
 
     const handleBooking = async (e) => {
     e.preventDefault()
@@ -128,6 +151,27 @@ const formatDate = (date) => {
     });
 };
 
+const formatTime = (date) => {
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    // hour12: true
+  })
+}
+
+const formatHour = (hour) => {
+  return new Date(
+    2026,
+    0,
+    1,
+    hour
+  ).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    // hour12: true
+  })
+}
+
 useEffect(() => {
   if (!startTime || !endTime) {
     //  setRoomStatuses([]);
@@ -164,6 +208,25 @@ const isRoomAvailable = (roomId) => {
   
   return room?.available ?? true;
 }
+
+useEffect(() => {
+  if (!selectedRoom) {
+    setSchedule([]);
+    return;
+  }
+
+  const fetchSchedule = async () => {
+    try {
+      const res = await api.get(`/bookings/schedule/${selectedRoom}`);
+      setSchedule(res.data);
+    } catch (error) {
+      console.error("Error fetching room schedule:", error);
+       setSchedule([]);
+    }
+  }
+  fetchSchedule();
+
+}, [selectedRoom]);
         
 // const formatDate = (date) => {
 //     return new Date(date).toLocaleString(
@@ -395,6 +458,160 @@ return (<div className="space-y-6 max-w-xl">
         </p>
       )}
 
+{!selectedRoom && (
+  <div className="text-center p-6">
+    <p>Please select a room to view its schedule.</p>
+  </div>
+)}
+
+<div className="mt-6">
+
+  <h2 className="text-xl font-bold mb-3">
+    Room Schedule
+  </h2>
+
+  {schedule.length === 0 ? (
+
+    <p>No reservations found.</p>
+
+  ) : (
+
+    schedule.map((booking) => (
+
+      <div
+        key={booking.id}
+        className="border rounded p-3 mb-2"
+      >
+
+        <div>
+          {formatTime(booking.startTime)}
+          {" - "}
+          {formatTime(booking.endTime)}
+        </div>
+
+        <div>
+          🔴 Reserved
+        </div>
+
+      </div>
+
+    ))
+
+  )}
+
+</div>
+
+{/* {hours.map(hour => (
+  <div 
+    key={hour}
+    className="flex justify-between border-b py-2"
+    >
+      <span>{formatHour(hour)}</span>
+      <span>
+        {isHourBooked(hour) ? "🔴 Booked" : "🟢 Available"}
+      </span>
+  </div>
+))} */}
+
+
+
+{/* Shows the available rooms and booked rooms statistics */}
+<div className="grid grid-cols-2 gap-4 mb-6">
+
+  <div className="bg-green-50 p-4 rounded-lg">
+
+    <div className="text-sm">
+      Available Slots
+    </div>
+
+    <div className="text-2xl font-bold">
+      {
+        hours.filter(
+          hour => !isHourBooked(hour)
+        ).length
+      }
+    </div>
+
+  </div>
+
+  <div className="bg-red-50 p-4 rounded-lg">
+
+    <div className="text-sm">
+      Reserved Slots
+    </div>
+
+    <div className="text-2xl font-bold">
+      {
+        hours.filter(
+          hour => isHourBooked(hour)
+        ).length
+      }
+    </div>
+
+  </div>
+
+</div>
+
+{/* Schedule display with colors */}
+<div className="bg-white rounded-xl shadow-md p-6 mt-6">
+
+<div className="mt-6">
+
+  <h2 className="text-xl font-bold mb-4">
+    Daily Schedule
+  </h2>
+
+  <div className="space-y-2">
+
+    {hours.map(hour => {
+
+      const booked = isHourBooked(hour)
+
+      return (
+
+        <div
+          key={hour}
+          className={`
+            flex
+            justify-between
+            items-center
+            p-3
+            rounded-lg
+            border
+
+            ${
+              booked
+                ? "bg-red-50 border-red-200"
+                : "bg-green-50 border-green-200"
+            }
+
+            ${
+              hour === currentHour
+                ? "ring-2 ring-blue-400"
+                : ""
+            }
+          `}
+        >
+
+          <div className="font-medium">
+            {formatHour(hour)}
+          </div>
+
+          <div className="font-semibold">
+            {booked
+              ? "🔴 Reserved"
+              : "🟢 Available"}
+          </div>
+
+        </div>
+
+      )
+    })}
+
+  </div>
+
+</div>
+</div>
 
 
   <h2 className="font-bold text-lg mb-3">
