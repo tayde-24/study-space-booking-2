@@ -16,7 +16,7 @@ export default function BookingForm() {
     const [roomStatuses, setRoomStatuses] = useState([]);
     const [availability, setAvailability] = useState([]);
     const [schedule, setSchedule] = useState([]);
-    
+    const [weeklySchedule, setWeeklySchedule] = useState([]);
     
     //const hours = [];
 
@@ -27,6 +27,30 @@ export default function BookingForm() {
       { length: 15 },
       (_, i) => i + 8
     );
+
+    const days = [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ];
+    
+
+    const isSlotBooked = (dayIndex, hour) => {
+      return weeklySchedule.some(booking => {
+        const date = new Date(booking.startTime);
+
+        return (
+          date.getDay() === dayIndex &&
+          hour >= date.getHours() &&
+          hour < new Date(booking.endTime).getHours()
+        )
+      }
+        )
+    }
 
     const isHourBooked = (hour) => {
       return schedule.some(booking => {
@@ -227,6 +251,24 @@ useEffect(() => {
   fetchSchedule();
 
 }, [selectedRoom]);
+
+useEffect(() => {
+  if (!selectedRoom) {
+    setWeeklySchedule([]);
+    return;
+  }
+
+  const fetchWeeklySchedule = async () => {
+    try {
+      const res = await api.get(`/bookings/week/${selectedRoom}`);
+      setWeeklySchedule(res.data);
+    } catch (error) {
+      console.error("Error fetching weekly schedule:", error);
+       setWeeklySchedule([]);
+    }
+  }
+  fetchWeeklySchedule();
+}, [schedule])
         
 // const formatDate = (date) => {
 //     return new Date(date).toLocaleString(
@@ -552,7 +594,98 @@ return (<div className="space-y-6 max-w-xl">
 
 </div>
 
-{/* Schedule display with colors */}
+{/* Weekly Schedule display with colors */}
+<div className="mt-8">
+
+  <h2 className="text-xl font-bold mb-4">
+    Weekly Schedule
+  </h2>
+
+  <div className="overflow-x-auto">
+
+    <table className="border-collapse">
+
+      <thead>
+
+        <tr>
+
+          <th className="border p-2">
+            Time
+          </th>
+
+          {days.map((day, dayIndex) => (
+            <th
+              key={day}
+              className={`border p-2 ${dayIndex === new Date().getDay() 
+                ? "bg-blue-100" : ""}`}
+            >
+              {day}
+            </th>
+          ))}
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {hours.map(hour => (
+
+          <tr key={hour}>
+
+            <td className="border p-2 font-medium">
+              {formatHour(hour)}
+            </td>
+
+            {days.map(
+              (_, dayIndex) => {
+
+                const booked =
+                  isSlotBooked(
+                    dayIndex,
+                    hour
+                  )
+
+                return (
+
+                  <td
+                    key={`${dayIndex}-${hour}`}
+                    className={`
+                      border
+                      p-2
+                      text-center
+
+                      ${
+                        booked
+                          ? "bg-red-100"
+                          : "bg-green-100"
+                      }
+                    `}
+                  >
+
+                    {booked
+                      ? "🔴"
+                      : "🟢"}
+
+                  </td>
+
+                )
+              }
+            )}
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+{/*Daily Schedule display with colors */}
 <div className="bg-white rounded-xl shadow-md p-6 mt-6">
 
 <div className="mt-6">
