@@ -17,7 +17,7 @@ export default function BookingForm() {
     const [availability, setAvailability] = useState([]);
     const [schedule, setSchedule] = useState([]);
     const [weeklySchedule, setWeeklySchedule] = useState([]);
-    
+    const [selectedSlot, setSelectedSlot] = useState(null);
     //const hours = [];
 
     // for (let hour = 8; hour <= 22; hour++) {
@@ -37,7 +37,36 @@ export default function BookingForm() {
       "Fri",
       "Sat"
     ];
-    
+
+const formatForDateTimeLocal = (date) => {
+  const offset = date.getTimezoneOffset()
+
+  const localDate = new Date(
+    date.getTime() - offset * 60000
+  )
+
+  return localDate
+    .toISOString()
+    .slice(0, 16)
+}
+
+    const handleSlotClick = (dayIndex, hour) => {
+      const today = new Date();
+
+      const startDate = new Date(today);
+      startDate.setDate(
+        today.getDate() - today.getDay() + dayIndex);
+
+      startDate.setHours(hour, 0, 0, 0);
+      const endDate = new Date(startDate);
+      endDate.setHours(startDate.getHours() + 1);
+
+      setSelectedSlot(`${dayIndex}-${hour}`);
+
+      // setStartTime(startDate.toISOString().slice(0, 16));
+      setStartTime(formatForDateTimeLocal(startDate));
+      setEndTime(formatForDateTimeLocal(endDate));
+    }
 
     const isSlotBooked = (dayIndex, hour) => {
       return weeklySchedule.some(booking => {
@@ -650,10 +679,15 @@ return (<div className="space-y-6 max-w-xl">
 
                   <td
                     key={`${dayIndex}-${hour}`}
+                    onClick={() => handleSlotClick(dayIndex, hour)}
                     className={`
                       border
                       p-2
                       text-center
+
+                      ${selectedSlot === `${dayIndex}-${hour}`
+                        ? "ring-2 ring-blue-500"
+                        : ""}
 
                       ${
                         booked
