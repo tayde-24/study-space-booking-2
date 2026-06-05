@@ -4,21 +4,39 @@ import api from "@/lib/api";
 
 export default function BookingForm() {
     const [message, setMessage] = useState("");
-    //added more down here
-    const [bookings, setBookings] = useState([]);
-    const [buildings, setBuildings] = useState([]);
-    const [selectedBuilding, setSelectedBuilding] = useState("");
-    const [selectedRoom, setSelectedRoom] = useState("");
-    const [roomId, setRoomId] = useState("");
-    const [rooms, setRooms] = useState("");
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
+    // //added more down here
+    // const [bookings, setBookings] = useState([]);
+    // const [buildings, setBuildings] = useState([]);
+    // const [selectedBuilding, setSelectedBuilding] = useState("");
+    // const [selectedRoom, setSelectedRoom] = useState("");
+    // const [roomId, setRoomId] = useState("");
+    // const [rooms, setRooms] = useState("");
+    // const [startTime, setStartTime] = useState("");
+    // const [endTime, setEndTime] = useState("");
     const [roomStatuses, setRoomStatuses] = useState([]);
-    const [availability, setAvailability] = useState([]);
-    const [schedule, setSchedule] = useState([]);
-    const [weeklySchedule, setWeeklySchedule] = useState([]);
-    const [selectedSlot, setSelectedSlot] = useState(null);
+    // const [availability, setAvailability] = useState([]);
+    // const [schedule, setSchedule] = useState([]);
+    // const [weeklySchedule, setWeeklySchedule] = useState([]);
+    // const [selectedSlot, setSelectedSlot] = useState(null);
+    // const [weekOffset, setWeekOffset] = useState(0)
     //const hours = [];
+    const [bookings, setBookings] = useState([])
+    const [buildings, setBuildings] = useState([])
+    const [rooms, setRooms] = useState([])
+
+    const [selectedBuilding, setSelectedBuilding] = useState("")
+    const [selectedRoom, setSelectedRoom] = useState("")
+
+    const [startTime, setStartTime] = useState("")
+    const [endTime, setEndTime] = useState("")
+
+    const [weeklySchedule, setWeeklySchedule] = useState([])
+    const [availability, setAvailability] = useState([])
+
+    const [selectedSlot, setSelectedSlot] = useState(null)
+    const [weekOffset, setWeekOffset] = useState(0)
+
+    const [schedule, setSchedule] = useState([]);
 
     // for (let hour = 8; hour <= 22; hour++) {
     //   hours.push(hour);
@@ -38,6 +56,30 @@ export default function BookingForm() {
       "Sat"
     ];
 
+const getWeekStart = (offset = 0) => {
+  const today = new Date();
+
+  const day = today.getDay();
+  const diff = today.getDate() - day + offset *7;
+
+  const weekStart = new Date(today);
+  weekStart.setDate(diff);
+  weekStart.setHours(0, 0, 0, 0);
+
+  return weekStart;
+
+}
+
+const fetchWeeklySchedule = async () => {
+    try {
+      const res = await api.get(`/bookings/week/${selectedRoom}`);
+      setWeeklySchedule(res.data);
+    } catch (error) {
+      console.error("Error fetching weekly schedule:", error);
+       //setWeeklySchedule([]);
+    }
+  }
+
 const formatForDateTimeLocal = (date) => {
   const offset = date.getTimezoneOffset()
 
@@ -51,11 +93,15 @@ const formatForDateTimeLocal = (date) => {
 }
 
     const handleSlotClick = (dayIndex, hour) => {
-      const today = new Date();
+      const weekStart = getWeekStart(weekOffset);
+      const startDate = new Date(weekStart);
+      //const today = new Date();
 
-      const startDate = new Date(today);
+      //const startDate = new Date(today);
+      // startDate.setDate(
+      //   today.getDate() - today.getDay() + dayIndex);
       startDate.setDate(
-        today.getDate() - today.getDay() + dayIndex);
+        weekStart.getDate() + dayIndex);
 
       startDate.setHours(hour, 0, 0, 0);
       const endDate = new Date(startDate);
@@ -81,6 +127,18 @@ const formatForDateTimeLocal = (date) => {
         )
     }
 
+    const getBookingForSlot = (dayIndex, hour) => {
+      return weeklySchedule.find((booking) => {
+        const start = new Date(booking.startTime);
+        const end = new Date(booking.endTime);
+        return (
+          start.getDay() === dayIndex &&
+          hour >= start.getHours() &&
+          hour < end.getHours()
+        );
+      });
+    }
+
     const isHourBooked = (hour) => {
       return schedule.some(booking => {
         const start = new Date(booking.startTime).getHours();
@@ -88,6 +146,11 @@ const formatForDateTimeLocal = (date) => {
 
         return hour >= start && hour < end;
       })
+    }
+
+    const isBlockStart = (booking, hour) => {
+      const start = new Date(booking.startTime);
+      return start.getHours() === hour;
     }
 
     const currentHour = new Date().getHours(); 
@@ -121,6 +184,8 @@ const formatForDateTimeLocal = (date) => {
     }
 
     alert("Booking created!")
+    await res.json()
+    await fetchWeeklySchedule();
   }
 
   useEffect(() => {
@@ -293,101 +358,18 @@ useEffect(() => {
       setWeeklySchedule(res.data);
     } catch (error) {
       console.error("Error fetching weekly schedule:", error);
-       setWeeklySchedule([]);
+       //setWeeklySchedule([]);
     }
   }
   fetchWeeklySchedule();
-}, [schedule])
-        
-// const formatDate = (date) => {
-//     return new Date(date).toLocaleString(
-//         "en-US",
-//         {
-//           dateStyle: "medium",
-//           timeStyle: "short"
-//         }
-//     );
-// }
+}, [schedule]);
 
 
 
-    // const handleBooking = async () => {
-    //     try {
-    //         await api.post("/bookings", {
-    //             userId: 7, // Replace with actual user ID
-    //             roomId: 1, // Replace with actual room ID
-    //             startTime: "2024-07-01T10:00:00Z",
-    //             endTime: "2024-07-01T12:00:00Z"
-    //         });
-
-    //         setMessage("Booking submitted successfully!");
-    //     } catch (error) {
-    //         //console.error("Error submitting booking:", error);
-    //         // console.error("Error submitting booking:", error);
-    //         setMessage(
-    //             error.response?.data?.error ||
-    //             "Failed to submit booking.");
-    //     }
-    // }    
-
-
-// return (
-//     // <div className="mt-6">
-//     //     <button onClick={handleBooking} className="bg-black text-white px-4 py-2 rounded-lg">
-//     //         Book Room 
-//     //     </button>
-//     //     {message && <p className="mt-2 text-red-500">{message}</p>}
-//     // </div>
-
-//     <form
-//       onSubmit={handleBooking}
-//       className="p-8 flex flex-col gap-4"
-//     >
-//       {/* <input
-//         type=""
-//         placeholder="Room ID"
-//         value={roomId}
-//         onChange={(e) => setRoomId(e.target.value)}
-//         className="border p-2"
-//       /> */}
-
-//       <select
-//         value={roomId}
-//         onChange={(e) => setRoomId(Number(e.target.value))}
-//         className="border p-2"
-//       >
-//         <option value="">Select Room</option>
-//         {Array.isArray(rooms) && rooms.map((room) => (
-//             <option 
-//                 key={room.id} 
-//                 value={room.id}> 
-//                     {room.name}
-//             </option>
-//         ))}
-//         </select>
-
-//       <input
-//         type="datetime-local"
-//         value={startTime}
-//         onChange={(e) => setStartTime(e.target.value)}
-//         className="border p-2"
-//       />
-
-//       <input
-//         type="datetime-local"
-//         value={endTime}
-//         onChange={(e) => setEndTime(e.target.value)}
-//         className="border p-2"
-//       />
-
-//       <button
-//         type="submit"
-//         className="bg-blue-500 text-white p-2 rounded"
-//       >
-//         Book Room
-//       </button>
-//     </form>
-// )
+useEffect(() => {
+  if (!selectedRoom) return
+  fetchWeeklySchedule()
+}, [selectedRoom, weekOffset])
 
 useEffect(() => {
   const fetchAvailability = async () => {
@@ -632,6 +614,27 @@ return (<div className="space-y-6 max-w-xl">
 
   <div className="overflow-x-auto">
 
+    <div className="flex justify-between items-center mb-4">
+
+  <button
+    onClick={() => setWeekOffset(prev => prev - 1)}
+    className="px-3 py-1 border rounded"
+  >
+    ← Prev Week
+  </button>
+
+  <h2 className="font-bold">
+    Week {weekOffset === 0 ? "(Current)" : weekOffset}
+  </h2>
+
+  <button
+    onClick={() => setWeekOffset(prev => prev + 1)}
+    className="px-3 py-1 border rounded"
+  >
+    Next Week →
+  </button>
+
+</div>
     <table className="border-collapse">
 
       <thead>
@@ -669,39 +672,77 @@ return (<div className="space-y-6 max-w-xl">
             {days.map(
               (_, dayIndex) => {
 
-                const booked =
-                  isSlotBooked(
-                    dayIndex,
-                    hour
-                  )
+                const booking = getBookingForSlot(dayIndex, hour);
+                const isBooked = !!booking;
+                console.log("booking:", booking)
+                // const booked =
+                //   isSlotBooked(
+                //     dayIndex,
+                //     hour
+                //   )
 
                 return (
-
                   <td
-                    key={`${dayIndex}-${hour}`}
-                    onClick={() => handleSlotClick(dayIndex, hour)}
-                    className={`
-                      border
-                      p-2
-                      text-center
+  key={`${dayIndex}-${hour}`}
+  onClick={() => handleSlotClick(dayIndex, hour)}
+  title={
+    booking
+      ? `Reserved ${new Date(booking.startTime).toLocaleTimeString()} - ${new Date(booking.endTime).toLocaleTimeString()}`
+      : "Available"
+  }
+  className={`
+    border p-2 text-center cursor-pointer
+    ${booking ? (
+  isBlockStart(booking, hour) ? (
+    <div className="bg-red-200 rounded p-1">
+      🔴
+    </div>
+  ) : (
+    <div className="opacity-0">.</div>
+  )
+) : (
+  <div className="bg-green-100 rounded">🟢</div>
+)}
 
-                      ${selectedSlot === `${dayIndex}-${hour}`
-                        ? "ring-2 ring-blue-500"
-                        : ""}
+        ${isBooked ? "bg-red-100" : "bg-green-100"}
 
-                      ${
-                        booked
-                          ? "bg-red-100"
-                          : "bg-green-100"
-                      }
-                    `}
-                  >
+    ${selectedSlot === `${dayIndex}-${hour}`
+      ? "ring-2 ring-blue-500"
+      : ""}
 
-                    {booked
-                      ? "🔴"
-                      : "🟢"}
+  `}
+>
+  {booking ? "🔴" : "🟢"}
+</td>
 
-                  </td>
+                  // <td
+                  //   key={`${dayIndex}-${hour}`}
+                  //   onClick={() => handleSlotClick(dayIndex, hour)}
+                  //   className={`
+                  //     border
+                  //     p-2
+                  //     text-center
+                  //     cursor-pointer
+
+                  //     ${isBooked ? "bg-red-100" : "bg-green-100"}
+
+                  //     ${selectedSlot === `${dayIndex}-${hour}`
+                  //       ? "ring-2 ring-blue-500"
+                  //       : ""}
+
+                  //     ${
+                  //       booking
+                  //         ? `Reserved\n${new Date(booking.startTime).toLocaleString()} - ${new Date(booking.endTime).toLocaleString()}`
+                  //         : "Available"
+                  //     }
+                  //   `}
+                  // >
+
+                  //   {booking
+                  //     ? "🔴"
+                  //     : "🟢"}
+
+                  // </td>
 
                 )
               }
