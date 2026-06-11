@@ -19,8 +19,14 @@ model User {
   googleId String    @unique
   email    String    @unique
   name     String
+  role     Role    @default(USER) // ADMIN logic lives here
   
   bookings Booking[]
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model Building {
