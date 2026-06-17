@@ -71,9 +71,6 @@ const formatDate = (date) => {
     return (
         // Include a search
         <div className="p-8">
-            <Link href="/admin" className="p-4 border rounded">
-                Admin Dashboard
-            </Link>
             <h1 className="text-2x1 font-bold mb-6">
                 Manage Reservations
             </h1>

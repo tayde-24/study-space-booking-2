@@ -72,9 +72,6 @@ export default function AdminRoomsPage() {
 
     return (
         <div className="p-8">
-            <Link href="/admin" className="p-4 border rounded">
-                Admin Dashboard
-            </Link>
             <h1 className="text-2xl font-bold mb-4">Manage Rooms</h1>
 
             {/* Room creation form */}

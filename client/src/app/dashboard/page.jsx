@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link";
+import SideBarLayout from "@/components/layouts/SideBar";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
@@ -105,22 +106,24 @@ useEffect(() => {
   }
 
   return (
-    <div className="p-8">
+    <SideBarLayout>
+    <div className="p-8 ">
 
       <h1 className="text-2xl font-bold">
         Dashboard
       </h1>
-      <Link href="/" className="underline text-blue-600">
+      {/* <Link href="/" className="underline text-blue-600">
         Back to Home
-      </Link>
-      <p>Welcome, {user.name}</p>
-      <p>{user.email}</p>
+      </Link> */}
+      <p className="text-lg italic mt-1">Welcome, <strong>{user.name}</strong></p>
+      {/* <p>{user.email}</p> */}
       <button
       onClick={logout}
-      className="mt-4 rounded-lg bg-red-500 px-4 py-2 text-white"
+      className="mt-4 rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600 transition-colors"
     >
       Logout
     </button>
+    <div className="mt-10 mb-5">
     <h2 className="text-xl font-bold">Your Bookings</h2>
 
     {bookings.length === 0 ? (
@@ -131,6 +134,7 @@ useEffect(() => {
             key={b.id}
             className="border p-3 rounded mt-2"
         >
+          <div></div>
         <p className="font-semibold">Room: {b.room?.name}</p>
         <p>
             {
@@ -160,5 +164,15 @@ useEffect(() => {
     ))
   )}
     </div>
+
+    <Link
+      href="/reservation"
+      className="bg-blue-600 text-white px-6 py-3 mt-10 rounded-lg transition-colors hover:bg-blue-700"
+    >
+      Reserve a Room
+    </Link>
+
+    </div>
+    </SideBarLayout>
   )
 }

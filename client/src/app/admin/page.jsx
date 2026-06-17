@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AdminLayout from "./layout";
 
 
 //const user = await res.data;
@@ -37,12 +38,12 @@ export default function AdminPage() {
     return (
         
         <div className="p-6">
-            {user?.role === "ADMIN" && (
+            {/* {user?.role === "ADMIN" && (
             <Link href="/admin" className="p-4 border rounded">
                 Admin Dashboard
             </Link>
             
-        )}
+        )} */}
         {/* <Link
             href="/admin/bookings"
             className="block border p-4 rounded"
@@ -54,7 +55,7 @@ export default function AdminPage() {
             <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
             <p>Welcome to the admin dashboard. Here you can manage buildings, rooms, and bookings.</p>
 
-            <div className="grid grid-cols-3 gap-4 mt-6">
+            {/* <div className="grid grid-cols-3 gap-4 mt-6">
                 <a href="/admin/buildings" className="p-4 border rounded">
                     Manage Buildings
                 </a>
@@ -66,7 +67,8 @@ export default function AdminPage() {
                 <a href="/admin/bookings" className="p-4 border rounded">
                     Manage Bookings
                 </a>
-            </div>  
+                
+            </div>   */}
             
             
         </div>

@@ -184,7 +184,7 @@ const formatForDateTimeLocal = (date) => {
     }
 
     alert("Booking created!")
-    await res.json()
+    //await res.json()
     await fetchWeeklySchedule();
   }
 
@@ -317,7 +317,7 @@ useEffect(() => {
   fetchAvailability();
 
   console.log("startTime:", startTime)
-console.log("endTime:", endTime)
+  console.log("endTime:", endTime)
       
 }, [startTime, endTime]);
 
@@ -385,10 +385,15 @@ useEffect(() => {
   fetchAvailability();
 }, []);
 
-return (<div className="space-y-6 max-w-xl">
+return (
+// Probably change this part
+<div className="justify-content">
 
+<div className="flex flex-row gap-20">
       {/* Building */}
-      <div>
+
+      <div className="">
+      <div className="">
 
         <label className="block mb-2 font-semibold">
           Building
@@ -511,6 +516,9 @@ return (<div className="space-y-6 max-w-xl">
         </p>
       )}
 
+
+
+
 {!selectedRoom && (
   <div className="text-center p-6">
     <p>Please select a room to view its schedule.</p>
@@ -553,6 +561,7 @@ return (<div className="space-y-6 max-w-xl">
   )}
 
 </div>
+</div>
 
 {/* {hours.map(hour => (
   <div 
@@ -569,7 +578,8 @@ return (<div className="space-y-6 max-w-xl">
 
 
 {/* Shows the available rooms and booked rooms statistics */}
-<div className="grid grid-cols-2 gap-4 mb-6">
+<div className="">
+  <div className="grid grid-cols-2 gap-4 mb-6">
 
   <div className="bg-green-50 p-4 rounded-lg">
 
@@ -603,10 +613,10 @@ return (<div className="space-y-6 max-w-xl">
 
   </div>
 
-</div>
+  </div>
 
-{/* Weekly Schedule display with colors */}
-<div className="mt-8">
+  {/* Weekly Schedule display with colors */}
+  <div className="mt-8">
 
   <h2 className="text-xl font-bold mb-4">
     Weekly Schedule
@@ -758,6 +768,9 @@ return (<div className="space-y-6 max-w-xl">
 
   </div>
 
+  </div>
+</div>
+
 </div>
 
 {/*Daily Schedule display with colors */}
@@ -822,7 +835,7 @@ return (<div className="space-y-6 max-w-xl">
 </div>
 
 
-  <h2 className="font-bold text-lg mb-3">
+  {/* <h2 className="font-bold text-lg mb-3">
     Existing Reservations
   </h2>
 
@@ -886,7 +899,7 @@ return (<div className="space-y-6 max-w-xl">
       </div>
     </div>
     </div>
-  ))}
+  ))} */}
   
 </div>
   )

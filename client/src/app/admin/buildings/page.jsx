@@ -59,9 +59,6 @@ export default function AdminBuildingsPage() {
 
     return(
         <div className="p-8">
-            <Link href="/admin" className="p-4 border rounded">
-                Admin Dashboard
-            </Link>
             <h1 className="text-2x1 font-bold mb-6">
                 Manage Buildings
             </h1>
