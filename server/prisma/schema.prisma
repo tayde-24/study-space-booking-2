@@ -30,19 +30,24 @@ enum Role {
 }
 
 model Building {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  location String?
-  rooms    Room[]
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  location    String?
+  imageUrl    String?
+  description String?
+  rooms       Room[]
 }
 model Room {
-  id       Int       @id @default(autoincrement())
-  name     String
-  capacity Int
+  id          Int       @id @default(autoincrement())
+  name        String
+  capacity    Int
+  imageUrl    String?
+  description String?
+  amenities   String?
 
-  buildingId Int
-  building   Building @relation(fields: [buildingId], references: [id])
-  bookings Booking[]
+  buildingId  Int
+  building    Building @relation(fields: [buildingId], references: [id])
+  bookings    Booking[]
 }
 
 model Booking {

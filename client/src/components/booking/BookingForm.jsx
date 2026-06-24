@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useState } from "react"
 import api from "@/lib/api";
+import BuildingList from "../cards/BuildingList";
+import RoomList from "../cards/RoomList";
+import BuildingPreview from "../cards/BuildingPreview";
+import RoomSlidePanel from "../cards/RoomSlidePanel";
+import WeeklyCalendar from "../calendar/WeeklyCalendar";
 
 export default function BookingForm() {
     const [message, setMessage] = useState("");
@@ -24,8 +29,11 @@ export default function BookingForm() {
     const [buildings, setBuildings] = useState([])
     const [rooms, setRooms] = useState([])
 
+
     const [selectedBuilding, setSelectedBuilding] = useState("")
+    const [showRoomsPanel, setShowRoomsPanel] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState("")
+    const [roomId, setRoomId] = useState(null);
 
     const [startTime, setStartTime] = useState("")
     const [endTime, setEndTime] = useState("")
@@ -72,7 +80,7 @@ const getWeekStart = (offset = 0) => {
 
 const fetchWeeklySchedule = async () => {
     try {
-      const res = await api.get(`/bookings/week/${selectedRoom}`);
+      const res = await api.get(`/bookings/week/${selectedRoom?.id}`);
       setWeeklySchedule(res.data);
     } catch (error) {
       console.error("Error fetching weekly schedule:", error);
@@ -127,17 +135,7 @@ const formatForDateTimeLocal = (date) => {
         )
     }
 
-    const getBookingForSlot = (dayIndex, hour) => {
-      return weeklySchedule.find((booking) => {
-        const start = new Date(booking.startTime);
-        const end = new Date(booking.endTime);
-        return (
-          start.getDay() === dayIndex &&
-          hour >= start.getHours() &&
-          hour < end.getHours()
-        );
-      });
-    }
+    
 
     const isHourBooked = (hour) => {
       return schedule.some(booking => {
@@ -168,7 +166,7 @@ const formatForDateTimeLocal = (date) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          roomId: Number(selectedRoom),
+          roomId: Number(selectedRoom?.id),
           startTime,
           endTime
         })
@@ -201,12 +199,33 @@ const formatForDateTimeLocal = (date) => {
     }, []);
 
     //Update rooms when building changes
-    const handleBuildingChange = async (e) => {
-      const buildingId = e.target.value;
-      setSelectedBuilding(buildingId);
-      const building = buildings.find(b => b.id === Number(buildingId));
-      setRooms(building?.rooms || []);
-      setSelectedRoom(""); // Reset selected room
+    // const handleBuildingChange = async (e) => {
+    //   const buildingId = e.target.value;
+    //   setSelectedBuilding(buildingId);
+    //   const building = buildings.find(b => b.id === Number(buildingId));
+    //   setRooms(building?.rooms || []);
+    //   setSelectedRoom(""); // Reset selected room
+    // };
+    const handleBuildingChange = async (building) => {
+      //const buildingId = building.id;
+
+      setSelectedBuilding(building);
+      const res = await fetch(`http://localhost:3001/rooms?buildingId=${building.id}`);
+      //const data = await res.json;
+
+      setRooms(building.rooms || []);
+      //setRooms(Array.isArray(data) ? data : []);
+    };
+
+    const handleRoomChange = (room) => {
+      setSelectedRoom(room);
+      setRoomId(room.id);
+      console.log({
+        roomId,
+        selectedRoom,
+        startTime,
+        endTime,
+      })
     };
 
     //Submit booking
@@ -238,7 +257,7 @@ const formatForDateTimeLocal = (date) => {
 
     const fetchBookings = async () => {
       try {
-        const res = await api.get(`/bookings/room/${selectedRoom}`);
+        const res = await api.get(`/bookings/room/${selectedRoom?.id}`);
         setBookings(res.data);
 
       } catch (error) {
@@ -335,7 +354,7 @@ useEffect(() => {
 
   const fetchSchedule = async () => {
     try {
-      const res = await api.get(`/bookings/schedule/${selectedRoom}`);
+      const res = await api.get(`/bookings/schedule/${selectedRoom?.id}`);
       setSchedule(res.data);
     } catch (error) {
       console.error("Error fetching room schedule:", error);
@@ -354,7 +373,9 @@ useEffect(() => {
 
   const fetchWeeklySchedule = async () => {
     try {
-      const res = await api.get(`/bookings/week/${selectedRoom}`);
+      console.log("selectedRoom:", selectedRoom);
+console.log("selectedRoom type:", typeof selectedRoom);
+      const res = await api.get(`/bookings/week/${selectedRoom?.id}`);
       setWeeklySchedule(res.data);
     } catch (error) {
       console.error("Error fetching weekly schedule:", error);
@@ -385,6 +406,13 @@ useEffect(() => {
   fetchAvailability();
 }, []);
 
+useEffect(() => {
+  if (!selectedRoom) return;
+  document.getElementById("calendar").scrollIntoView({ behavior: "smooth" });
+}, [selectedRoom])
+
+console.log("selectedBuilding:", selectedBuilding);
+
 return (
 // Probably change this part
 <div className="justify-content">
@@ -392,14 +420,14 @@ return (
 <div className="flex flex-row gap-20">
       {/* Building */}
 
-      <div className="">
+  <div className="" id="flexxx left">
       <div className="">
 
-        <label className="block mb-2 font-semibold">
+        {/* <label className="block mb-2 font-semibold">
           Building
-        </label>
+        </label> */}
 
-        <select
+        {/* <select
           value={selectedBuilding}
           onChange={handleBuildingChange}
           className="border rounded-lg p-2 w-full"
@@ -420,18 +448,191 @@ return (
 
           ))}
 
-        </select>
+        </select> */}
+
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {buildings.map((building) => (
+  <div
+    key={building.id}
+    onClick={() => {
+      setSelectedBuilding(building.id)
+      setRooms(building.rooms || [])
+      setSelectedRoom("")
+    }}
+    className={`
+      border rounded-xl overflow-hidden cursor-pointer
+      hover:shadow-lg transition
+
+      ${selectedBuilding === building.id
+        ? "ring-2 ring-blue-500"
+        : ""}
+    `}
+  > */}
+
+    {/* Image */}
+    {/* <img
+      src={building.imageUrl || "/placeholder.jpg"}
+      className="h-40 w-full object-cover"
+    /> */}
+
+    {/* Content */}
+    {/* <div className="p-3">
+      <h2 className="font-bold text-lg">
+        {building.name}
+      </h2>
+
+      <p className="text-sm text-gray-600">
+        {building.description || "No description"}
+      </p>
+
+      <div className="mt-2 text-sm font-medium">
+        🏢 {building.rooms?.length || 0} rooms
+      </div>
+    </div>
+
+  </div>
+))} */}
+          {/* </div> */}
+
+
+          {/* {!selectedBuilding? (
+          <BuildingList
+            buildings={buildings}
+            //selectedBuilding={selectedBuilding}
+            onSelectBuilding={handleBuildingChange}
+          />) : (
+            <RoomList
+            rooms={selectedBuilding?.rooms || []}
+            selectedRoom={selectedRoom}
+            onSelectRoom={handleRoomChange}
+          />
+        )} */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+            {/**LEFT: Building Selection */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Select Building</h2>
+              <BuildingList
+                buildings={buildings}
+                // onSelectBuilding={setSelectedBuilding}
+                onSelectBuilding={handleBuildingChange}
+                selectedBuilding={selectedBuilding}
+              />
+            </div>
+
+            {/**RIGHT: Preview Panel */}
+            <div>
+              <BuildingPreview 
+              building={selectedBuilding}
+              onViewRooms={() => setShowRoomsPanel(true)}
+              />
+            </div>
+        </div> 
+
+{/* Mobile version here 
+        <RoomSlidePanel
+            isOpen={showRoomsPanel}
+            building={selectedBuilding}
+            rooms={rooms}
+            selectedRoom={selectedRoom}
+            onClose={() => setShowRoomsPanel(false)}
+            onSelectRoom={(room) => {
+              handleRoomChange(room);
+              setShowRoomsPanel(false);
+            }}
+        >
+          <RoomList
+            rooms={rooms}
+            selectedRoom={selectedRoom}
+            onSelectRoom={(room) =>{
+              handleRoomChange(room);
+              setShowRoomsPanel(false)
+            }}
+          />
+        </RoomSlidePanel>
+
+        <div className="p-6" id="calendar">
+        {selectedRoom && (
+          <div className="mt-6 p-4 border rounded-xl bg-blue-50">
+            <h3 className="font-semibold">
+              Selected Room
+            </h3>
+
+            <p>{selectedRoom.name}</p>
+          </div>
+        )}
+        </div>*/}
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6" id="calendar">
+          {/**LEFT: Room Selection */}
+          <div className="lg:col-span-1">
+            <div className="bg-white border rounded-xl shadow-md p-4">
+              <h2 className="text-xl font-semibold mb-4">
+                Available Rooms
+              </h2>
+              <RoomList
+                rooms={selectedBuilding?.rooms || []}
+                selectedRoom={selectedRoom}
+                onSelectRoom={handleRoomChange}
+              />
+            </div>
+          </div>
+
+            {/* Left side panel */}
+            <div className="lg:col-span-3">
+              <div className="bg-white border rounded-xl shadow-md p-4">
+                <h2 className="text-xl font-semibold mb-4">
+                  {selectedRoom ? `Schedule for ${selectedRoom.name}` 
+                  : "Select a room"}
+                </h2>
+
+                {!selectedRoom ? (
+                  <div className="text-center text-gray-500 py-12">
+                    Select a room to view its schedule.
+                  </div>
+                ) : (
+                  <WeeklyCalendar
+                    selectedRoom={selectedRoom}
+                    selectedSlot={selectedSlot}
+                    weeklySchedule={weeklySchedule}
+                    weekOffset={weekOffset}
+                    setWeekOffset={setWeekOffset}
+                    handleSlotClick={handleSlotClick}
+                    isSlotBooked={isSlotBooked}
+                    handleBooking={handleBooking}
+                    setStartTime={setStartTime}
+                    setEndTime={setEndTime}
+                    startTime={startTime}
+                    endTime={endTime}
+                  />
+
+                  
+                )}
+
+
+              </div>
+            </div>
+
+
+        </div>
 
       </div>
+
+
+
+
+
+
+
+
+      
 
       {/* Room */}
       <div>
 
-        <label className="block mb-2 font-semibold">
+        {/* <label className="block mb-2 font-semibold">
           Room
-        </label>
+        </label> */}
 
-        <select
+        {/* <select
           value={selectedRoom}
           onChange={(e) =>
             setSelectedRoom(e.target.value)
@@ -461,12 +662,143 @@ return (
           ))}
           
 
-        </select>
+        </select> */}
+        {/* {!selectedBuilding && (
+            <div className="text-center p-6">
+              <p>Please select a building to view its rooms.</p>
+            </div>
+          )} */}
+
+        {/* <div className="mb-6"> */}
+
+  {/* <h2 className="text-xl font-bold mb-4">
+    Select Room
+  </h2> */}
+
+  {/* {!selectedBuilding && (
+
+    <div className="text-gray-500">
+      Select a building first.
+    </div>
+
+  )} */}
+
+  {/* {selectedBuilding && (
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      {rooms.map((room) => {
+
+        const available =
+          isRoomAvailable(room.id)
+
+        return (
+
+          <div
+            key={room.id}
+            onClick={() => {
+              if (!available) return
+
+              setSelectedRoom(room.id)
+            }}
+            className={`
+              cursor-pointer
+              border
+              rounded-xl
+              overflow-hidden
+              transition
+
+              ${
+                selectedRoom === room.id
+                  ? "ring-2 ring-green-500"
+                  : "hover:shadow-lg"
+              }
+
+              ${
+                !available
+                  ? "opacity-50"
+                  : ""
+              }
+            `}
+          >
+
+            <img
+              src={
+                room.imageUrl ||
+                "/images/rooms/default.jpg"
+              }
+              alt={room.name}
+              className="h-32 w-full object-cover"
+            />
+
+            <div className="p-4">
+
+              <h3 className="font-bold">
+                {room.name}
+              </h3>
+
+              <div className="text-sm text-gray-600">
+                Capacity: {room.capacity}
+              </div>
+
+              {room.description && (
+                <p className="text-sm mt-2">
+                  {room.description}
+                </p>
+              )}
+
+              {room.amenities && (
+
+                <div className="flex flex-wrap gap-2 mt-3">
+
+                  {room.amenities
+                    .split(",")
+                    .map((item, index) => (
+
+                      <span
+                        key={index}
+                        className="
+                          bg-gray-100
+                          px-2
+                          py-1
+                          rounded
+                          text-xs
+                        "
+                      >
+                        {item.trim()}
+                      </span>
+
+                    ))}
+
+                </div>
+
+              )}
+
+              <div className="mt-3">
+
+                {available
+                  ? "🟢 Available"
+                  : "🔴 Reserved"}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )
+      })}
+
+    </div>
+
+  )} */}
+
+{/* </div> */}
 
       </div>
 
       {/* Start Time */}
-      <div>
+      {/* <div>
 
         <label className="block mb-2 font-semibold">
           Start Time
@@ -481,10 +813,10 @@ return (
           className="border rounded-lg p-2 w-full"
         />
 
-      </div>
+      </div> */}
 
       {/* End Time */}
-      <div>
+      {/* <div>
 
         <label className="block mb-2 font-semibold">
           End Time
@@ -499,27 +831,27 @@ return (
           className="border rounded-lg p-2 w-full"
         />
 
-      </div>
+      </div> */}
 
       {/* Submit */}
-      <button
+      {/* <button
         onClick={handleBooking}
         className="bg-black text-white px-4 py-2 rounded-xl"
       >
         Reserve Room
-      </button>
+      </button> */}
 
       {/* Message */}
-      {message && (
+      {/* {message && (
         <p className="font-medium">
           {message}
         </p>
-      )}
+      )} */}
 
 
 
 
-{!selectedRoom && (
+{/* {!selectedRoom && (
   <div className="text-center p-6">
     <p>Please select a room to view its schedule.</p>
   </div>
@@ -530,6 +862,7 @@ return (
   <h2 className="text-xl font-bold mb-3">
     Room Schedule
   </h2>
+
 
   {schedule.length === 0 ? (
 
@@ -559,9 +892,13 @@ return (
     ))
 
   )}
+ 
 
+</div> */}
 </div>
-</div>
+
+
+
 
 {/* {hours.map(hour => (
   <div 
@@ -576,9 +913,9 @@ return (
 ))} */}
 
 
-
+// {/* Weekly Schedule display with colors */}
 {/* Shows the available rooms and booked rooms statistics */}
-<div className="">
+{/* <div className="">
   <div className="grid grid-cols-2 gap-4 mb-6">
 
   <div className="bg-green-50 p-4 rounded-lg">
@@ -595,33 +932,34 @@ return (
       }
     </div>
 
-  </div>
+  </div> */}
 
-  <div className="bg-red-50 p-4 rounded-lg">
+  {/* <div className="bg-red-50 p-4 rounded-lg"> */}
 
-    <div className="text-sm">
+    {/* <div className="text-sm">
       Reserved Slots
-    </div>
+    </div> */}
 
-    <div className="text-2xl font-bold">
+    {/* <div className="text-2xl font-bold">
       {
         hours.filter(
           hour => isHourBooked(hour)
         ).length
       }
-    </div>
+    </div> */}
 
-  </div>
+  {/* </div> */}
 
-  </div>
+  {/* </div> */}
 
   {/* Weekly Schedule display with colors */}
-  <div className="mt-8">
+  {/* <div className="mt-8">
 
   <h2 className="text-xl font-bold mb-4">
     Weekly Schedule
   </h2>
 
+<div id="calendar"> 
   <div className="overflow-x-auto">
 
     <div className="flex justify-between items-center mb-4">
@@ -767,14 +1105,16 @@ return (
     </table>
 
   </div>
-
-  </div>
 </div>
+
+  </div> */}
+{/* </div> */}
 
 </div>
 
 {/*Daily Schedule display with colors */}
-<div className="bg-white rounded-xl shadow-md p-6 mt-6">
+
+{/* <div className="bg-white rounded-xl shadow-md p-6 mt-6">
 
 <div className="mt-6">
 
@@ -832,7 +1172,11 @@ return (
   </div>
 
 </div>
-</div>
+</div> */}
+
+
+
+
 
 
   {/* <h2 className="font-bold text-lg mb-3">

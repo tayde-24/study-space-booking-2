@@ -13,6 +13,9 @@ router.get("/", async (req, res) => {
     const rooms = await prisma.room.findMany({
       orderBy: {
         name: "asc"
+      },
+      where: {
+        buildingId: Number(req.query.buildingId),
       }
     })
 
