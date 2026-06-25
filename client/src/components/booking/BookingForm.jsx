@@ -6,6 +6,7 @@ import RoomList from "../cards/RoomList";
 import BuildingPreview from "../cards/BuildingPreview";
 import RoomSlidePanel from "../cards/RoomSlidePanel";
 import WeeklyCalendar from "../calendar/WeeklyCalendar";
+import BookingConfirmationModal from "../modals/BookingConfirmationModal";
 
 export default function BookingForm() {
     const [message, setMessage] = useState("");
@@ -45,6 +46,8 @@ export default function BookingForm() {
     const [weekOffset, setWeekOffset] = useState(0)
 
     const [schedule, setSchedule] = useState([]);
+
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     // for (let hour = 8; hour <= 22; hour++) {
     //   hours.push(hour);
@@ -154,7 +157,7 @@ const formatForDateTimeLocal = (date) => {
     const currentHour = new Date().getHours(); 
 
     const handleBooking = async (e) => {
-    e.preventDefault()
+    e?.preventDefault()
 
     // PUT FETCH CODE HERE
     const res = await fetch(
@@ -523,6 +526,7 @@ return (
             <div>
               <BuildingPreview 
               building={selectedBuilding}
+              // onViewRooms={() => setShowRoomsPanel(true)}
               onViewRooms={() => setShowRoomsPanel(true)}
               />
             </div>
@@ -561,6 +565,8 @@ return (
           </div>
         )}
         </div>*/}
+
+        {/* Room Section */}
         <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6" id="calendar">
           {/**LEFT: Room Selection */}
           <div className="lg:col-span-1">
@@ -602,6 +608,7 @@ return (
                     setEndTime={setEndTime}
                     startTime={startTime}
                     endTime={endTime}
+                    setShowConfirmation={setShowConfirmation}
                   />
 
                   
@@ -611,6 +618,21 @@ return (
               </div>
             </div>
 
+            <BookingConfirmationModal
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={async () => {
+              await handleBooking();
+              setShowConfirmation(false);
+            }}
+            selectedBuilding={selectedBuilding}
+            selectedRoom={selectedRoom}
+            startTime={startTime}
+            endTime={endTime}
+            >
+
+            
+            </BookingConfirmationModal>
 
         </div>
 
@@ -913,7 +935,7 @@ return (
 ))} */}
 
 
-// {/* Weekly Schedule display with colors */}
+{/* Weekly Schedule display with colors */}
 {/* Shows the available rooms and booked rooms statistics */}
 {/* <div className="">
   <div className="grid grid-cols-2 gap-4 mb-6">

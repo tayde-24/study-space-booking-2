@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 export default function WeeklyCalendar({
     room,
@@ -20,6 +21,7 @@ export default function WeeklyCalendar({
     setStartTime,
     setEndTime,
     handleBooking,
+    setShowConfirmation,
 }) {
     const hours = Array.from({ length: 15 }, (_, i) => i + 8);
 
@@ -49,25 +51,30 @@ const getBookingForSlot = (dayIndex, hour) => {
       });
     }
 
-    // const isSlotBooked = (dayIndex, hour) => {
-    //     return weeklySchedule.some((booking) => {
-    //         const start = new Date(booking.startTime);
-    //         const end = new Date(booking.endTime);
-
-    //         const bookingDay = start.getDay();
-
-    //         return(
-    //             bookingDay === dayIndex &&
-    //             hour >= start.getHours() &&
-    //             hour < end.getHours()
-    //         );
-    //     });
-    //     };
-
         return (
 
             <div>
 <div className="overflow-x-auto">
+
+    <div className="p-4 grid grid-cols-2">
+
+            {/* <Image
+              src={selectedRoom?.imageUrl}
+              alt={selectedRoom?.name}
+              width={600}
+              height={400}
+              className="w-full rounded-lg mb-4 object-cover"
+            /> */}
+            <img
+            src={selectedRoom?.imageUrl}
+            alt={selectedRoom?.name}
+            className="w-full rounded"
+            />
+
+            {/* <div className="">
+                Paragraph
+            </div> */}
+    </div>
 
     <div className="flex justify-between items-center mb-4">
 
@@ -198,8 +205,13 @@ const getBookingForSlot = (dayIndex, hour) => {
       </div> 
 
       {/* Submit */}
-      <button
+      {/* <button
         onClick={handleBooking}
+        className="bg-black text-white px-4 py-2 rounded-xl"
+      > */}
+      <button
+        onClick={() => setShowConfirmation(true)}
+        disabled={!selectedRoom || !startTime || !endTime}
         className="bg-black text-white px-4 py-2 rounded-xl"
       >
         Reserve Room
