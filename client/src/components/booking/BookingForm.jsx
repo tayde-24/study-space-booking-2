@@ -48,6 +48,8 @@ export default function BookingForm() {
     const [schedule, setSchedule] = useState([]);
 
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showRoomSection, setShowRoomSection] = useState(false);
+    const [showRoomPanel, setShowRoomPanel] = useState(false);
 
     // for (let hour = 8; hour <= 22; hour++) {
     //   hours.push(hour);
@@ -138,16 +140,28 @@ const formatForDateTimeLocal = (date) => {
         )
     }
 
+    const isHourBooked = (dayIndex, hour) => {
+  return schedule.some(booking => {
+    const start = new Date(booking.startTime);
+    const end = new Date(booking.endTime);
+
+    const slot = new Date(start);
+    slot.setDate(start.getDate() + dayIndex);
+    slot.setHours(hour, 0, 0, 0);
+
+    return slot >= start && slot < end;
+  });
+};
     
 
-    const isHourBooked = (hour) => {
-      return schedule.some(booking => {
-        const start = new Date(booking.startTime).getHours();
-        const end = new Date(booking.endTime).getHours();
+    // const isHourBooked = (hour) => {
+    //   return schedule.some(booking => {
+    //     const start = new Date(booking.startTime).getHours();
+    //     const end = new Date(booking.endTime).getHours();
 
-        return hour >= start && hour < end;
-      })
-    }
+    //     return hour >= start && hour < end;
+    //   })
+    // }
 
     const isBlockStart = (booking, hour) => {
       const start = new Date(booking.startTime);
@@ -222,6 +236,7 @@ const formatForDateTimeLocal = (date) => {
 
     const handleRoomChange = (room) => {
       setSelectedRoom(room);
+      setShowRoomPanel(false);
       setRoomId(room.id);
       console.log({
         roomId,
@@ -411,10 +426,34 @@ useEffect(() => {
 
 useEffect(() => {
   if (!selectedRoom) return;
-  document.getElementById("calendar").scrollIntoView({ behavior: "smooth" });
+  document.getElementById("calendar")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }, [selectedRoom])
 
+const handleViewRooms = () => {
+  console.log("View Rooms clicked");
+  console.log({
+    showRoomPanel,
+    showRoomSection
+  })
+  setShowRoomSection(true);
+  setShowRoomPanel(true);
+  // if (window.innerWidth >= 1024) {
+  //   // Desktop
+  //   setShowRoomSection(true);
+
+  //   setTimeout(() => {
+  //     document
+  //       .getElementById("calendar")
+  //       ?.scrollIntoView({ behavior: "smooth" });
+  //   }, 100);
+  // } else {
+  //   // Mobile
+  //   setShowRoomPanel(true);
+  // }
+};
+
 console.log("selectedBuilding:", selectedBuilding);
+console.log("BookingForm isHourBooked:", typeof isHourBooked);
 
 return (
 // Probably change this part
@@ -526,15 +565,24 @@ return (
             <div>
               <BuildingPreview 
               building={selectedBuilding}
+              onViewRooms={handleViewRooms}
               // onViewRooms={() => setShowRoomsPanel(true)}
-              onViewRooms={() => setShowRoomsPanel(true)}
+              // onViewRooms={() => { 
+              //   setShowRoomSection(true);
+              //   document.getElementById("calendar")?.scrollIntoView({
+              //     behavior: "smooth",
+
+              //   });
+              // }}
               />
             </div>
         </div> 
 
-{/* Mobile version here 
+{/* Mobile version here */}
+      <div className="lg:hidden">
         <RoomSlidePanel
-            isOpen={showRoomsPanel}
+            // isOpen={showRoomsPanel}
+            isOpen={showRoomPanel}
             building={selectedBuilding}
             rooms={rooms}
             selectedRoom={selectedRoom}
@@ -554,7 +602,7 @@ return (
           />
         </RoomSlidePanel>
 
-        <div className="p-6" id="calendar">
+        <div className="p-6" >
         {selectedRoom && (
           <div className="mt-6 p-4 border rounded-xl bg-blue-50">
             <h3 className="font-semibold">
@@ -562,12 +610,49 @@ return (
             </h3>
 
             <p>{selectedRoom.name}</p>
+                {/* <h2 className="text-xl font-semibold mb-4">
+                  {selectedRoom ? `Schedule for ${selectedRoom.name}` 
+                  : "Select a room"}
+                </h2> */}
+
+                {!selectedRoom ? (
+                  <div className="text-center text-gray-500 py-12">
+                    Select a room to view its schedule.
+                  </div>
+                ) : (
+                  <WeeklyCalendar
+                    selectedRoom={selectedRoom}
+                    selectedSlot={selectedSlot}
+                    weeklySchedule={weeklySchedule}
+                    weekOffset={weekOffset}
+                    setWeekOffset={setWeekOffset}
+                    handleSlotClick={handleSlotClick}
+                    isSlotBooked={isSlotBooked}
+                    isHourBooked={isHourBooked}
+                    handleBooking={handleBooking}
+                    setStartTime={setStartTime}
+                    setEndTime={setEndTime}
+                    startTime={startTime}
+                    endTime={endTime}
+                    setShowConfirmation={setShowConfirmation}
+                  />  
+                )}
+
           </div>
-        )}
-        </div>*/}
+        )}  
+
+        </div>
+        </div>
+
+        
 
         {/* Room Section */}
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6" id="calendar">
+        {showRoomSection && (
+          //<div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6" id="calendar">
+          <div className={`hidden p-6 lg:grid grid-cols-1 lg:grid-cols-4 gap-6 
+          transition-all duration-500 ${showRoomSection ? "opacity-100 translate-y-0" :
+            "opacity-0 translate-y-4 hidden"
+          }`} id="calendar">
           {/**LEFT: Room Selection */}
           <div className="lg:col-span-1">
             <div className="bg-white border rounded-xl shadow-md p-4">
@@ -595,6 +680,7 @@ return (
                     Select a room to view its schedule.
                   </div>
                 ) : (
+                  
                   <WeeklyCalendar
                     selectedRoom={selectedRoom}
                     selectedSlot={selectedSlot}
@@ -603,12 +689,14 @@ return (
                     setWeekOffset={setWeekOffset}
                     handleSlotClick={handleSlotClick}
                     isSlotBooked={isSlotBooked}
+                    isHourBooked={isHourBooked}
                     handleBooking={handleBooking}
                     setStartTime={setStartTime}
                     setEndTime={setEndTime}
                     startTime={startTime}
                     endTime={endTime}
                     setShowConfirmation={setShowConfirmation}
+                    selectedBuilding={selectedBuilding}  
                   />
 
                   
@@ -618,7 +706,12 @@ return (
               </div>
             </div>
 
-            <BookingConfirmationModal
+            
+
+        </div>
+        )}
+        
+<BookingConfirmationModal
             isOpen={showConfirmation}
             onClose={() => setShowConfirmation(false)}
             onConfirm={async () => {
@@ -633,8 +726,6 @@ return (
 
             
             </BookingConfirmationModal>
-
-        </div>
 
       </div>
 

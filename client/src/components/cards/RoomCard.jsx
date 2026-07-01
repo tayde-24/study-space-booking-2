@@ -25,11 +25,11 @@ export default function RoomCard({ room, onSelect, selected }) {
             <p className="text-gray-500 text-sm">
                 Capacity: {room.capacity}
             </p>
-            <p className="text-gray-600 text-sm">
+            {/* <p className="text-gray-600 text-sm">
                 {room.description}
-            </p>
+            </p> */}
 
-            <div className="flex flex-wrap gap-2 mt-2">
+            {/* <div className="flex flex-wrap gap-2 mt-2">
           {room.amenities?.slice(0, 3).map((a) => (
             <span
               key={a}
@@ -38,7 +38,23 @@ export default function RoomCard({ room, onSelect, selected }) {
               {a}
             </span>
           ))}
-        </div>
+        </div> */}
+        {/* <div className="flex flex-wrap gap-2 mt-2">
+  {room?.amenities ? (
+    room.amenities.split(",").map((a) => (
+      <span
+        key={a.trim()}
+        className="text-xs bg-gray-100 px-2 py-1 rounded-full"
+      >
+        {a.trim()}
+      </span>
+    ))
+  ) : (
+    <span className="text-sm text-gray-500">
+      No amenities listed.
+    </span>
+  )}
+</div> */}
         
             </div>
         </div>

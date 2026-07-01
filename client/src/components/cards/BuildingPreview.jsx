@@ -1,4 +1,8 @@
+import { useState } from "react";
+
 export default function BuildingPreview({building, onViewRooms,}) {
+    const [expanded, setExpanded] = useState(false);
+
     if(!building) {
         return (
             <div className="p-6 text-gray-500 border rounded-xl">
@@ -23,9 +27,26 @@ export default function BuildingPreview({building, onViewRooms,}) {
             </h2>
 
             {/**Description */}
-            <p className="text-sm text-gray-600 mt-2">
-                {building.description}
-            </p>
+            <div className={`overflow-hidden transition-all duration-300
+            ${expanded ? "max-h-[1000px]" : "max-h-24"}`}>
+                <p className="text-sm text-gray-600 mt-2 whitespace-pre-wrap"
+                //dangerouslySetInnerHTML={{ __html: building?.description ||  ""}}>
+                dangerouslySetInnerHTML={{ __html: expanded ? building?.description : building?.description?.slice(0, 180) + (building?.description?.length > 180 ? "..." : "") }}>
+                    {/* {expanded 
+                    ? building?.description
+                    : building?.description?.slice(0, 180) + (building?.description?.length > 180 ? "..." : "")
+                    } */}
+
+                </p>
+                {building?.description?.length > 180 && (
+                        <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="text-blue-500 ml-2 mt-2 hover:text-blue-700 transition font-medium"
+                        >
+                        {expanded ? "Show Less" : "Read More"}
+                        </button>
+                    )}
+            </div>
 
             {/**Amenities */}
              <div className="flex flex-wrap gap-2 mt-3">

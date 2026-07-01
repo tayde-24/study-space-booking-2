@@ -3,10 +3,10 @@ import RoomCard from "./RoomCard";
 export default function RoomList({ rooms = [], onSelectRoom, selectedRoom }) {
     const safeRooms = Array.isArray(rooms) ? rooms: [];
     return (
-        <div className="p-6">
-            <h2 className="font-semibold text-xl mb-4">
+        <div className="pt-6 pb-6">
+            {/* <h2 className="font-semibold text-xl mb-4">
                 Available Rooms
-            </h2>
+            </h2> */}
         <div className="grid grid-cols-1 gap-6">
             {safeRooms.map((room) => (
                 <RoomCard

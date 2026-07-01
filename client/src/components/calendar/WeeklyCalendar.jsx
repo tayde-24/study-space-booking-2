@@ -22,7 +22,12 @@ export default function WeeklyCalendar({
     setEndTime,
     handleBooking,
     setShowConfirmation,
+    selectedBuilding,
+    isHourBooked
 }) {
+  const isHourBookedSlot = typeof isHourBooked === "function" ? isHourBooked : () => false;
+  
+  console.log("WeeklyCalendar isHourBooked:", typeof isHourBooked);
     const hours = Array.from({ length: 15 }, (_, i) => i + 8);
 
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -56,7 +61,7 @@ const getBookingForSlot = (dayIndex, hour) => {
             <div>
 <div className="overflow-x-auto">
 
-    <div className="p-4 grid grid-cols-2">
+    <div className="p-4 grid grid-cols-2 text-wrap gap-4">
 
             {/* <Image
               src={selectedRoom?.imageUrl}
@@ -71,12 +76,108 @@ const getBookingForSlot = (dayIndex, hour) => {
             className="w-full rounded"
             />
 
-            {/* <div className="">
-                Paragraph
-            </div> */}
+            <div className="ml-5">
+              {selectedBuilding?.name && (
+                <p className="text-sm text-gray-600">
+                  🏢 Building: {selectedBuilding.name}
+                </p>
+              )}
+              {selectedRoom?.name && (
+                <p className="text-sm text-gray-600">
+                  🚪 Room: {selectedRoom.name}
+                </p>
+              )}
+              {selectedRoom?.capacity && (
+                <p className="text-sm text-gray-600">
+                  👥 Capacity: {selectedRoom.capacity}
+                </p>
+              )}
+              
+
+              {selectedRoom?.description && (
+            <p className="text-sm text-gray-500 mt-3">
+              {selectedRoom.description}
+            </p>
+          )}
+          </div>
+          
+          <div>
+            <span className="text-sm">Amenities:</span>
+              {selectedRoom?.amenities ? (
+                  selectedRoom.amenities.split(",").map((a) => (
+                    
+                    <p
+                    key={a}
+                    className="text-xs bg-gray-100 px-3 py-2 rounded-full mt-2"
+                    >
+                      {a}
+                    </p>
+            
+          ))) : (
+            
+              <p className="text-sm text-gray-500">
+                No amenities listed.
+              </p>
+          )}
+          </div>
+
+          
+                
+            
+            {/* <div className="flex flex-wrap gap-2 mt-3">
+               
+        </div> */}
     </div>
 
-    <div className="flex justify-between items-center mb-4">
+
+  <div className="grid grid-cols-2 gap-4 mb-6 mt-5">
+
+  <div className="bg-green-50 p-4 rounded-lg">
+
+    <div className="text-sm">
+      Available Slots
+    </div>
+
+    <div className="text-2xl font-bold">
+      {
+        // hours.filter(
+        //   hour => !isHourBooked(hour)
+        // ).length
+        // hours.filter(hour => !isHourBooked(dayIndex, hour)).length
+        hours.filter(hour =>
+          days.every((_, dayIndex) => !isHourBookedSlot(dayIndex, hour))
+          ).length
+      }
+    </div>
+
+  </div>
+
+<div className="bg-red-50 p-4 rounded-lg">
+
+    <div className="text-sm">
+      Reserved Slots
+    </div>
+
+    <div className="text-2xl font-bold">
+      {
+        hours.filter(
+          hour => isHourBookedSlot(hour)
+        ).length
+      }
+    </div>
+
+  </div>
+
+  </div>
+
+  <div className="mt-5 text-sm border rounded bg-gray-50 p-3">
+    <p className="mb-2"><strong>Legend: </strong></p>
+    <p>🟢 Available</p>
+    <p>🔴 Reserved</p>
+  </div>
+
+
+  <div className="flex justify-between items-center mb-4 mt-5">
 
   <button
     onClick={() => setWeekOffset(prev => prev - 1)}
@@ -102,7 +203,7 @@ const getBookingForSlot = (dayIndex, hour) => {
 
       <thead>
 
-        <tr>
+        <tr className="bg-gray-100 text-sm">
 
           <th className="border p-2">
             Time
@@ -128,13 +229,13 @@ const getBookingForSlot = (dayIndex, hour) => {
 
           <tr key={hour}>
 
-            <td className="border p-2 font-medium">
+            <td className="border p-2 text-sm">
               {formatHour(hour)}
             </td>
 
             {days.map((_, dayIndex) => {
-  const booking = getBookingForSlot(dayIndex, hour);
-  const isBooked = !!booking;
+              const booking = getBookingForSlot(dayIndex, hour);
+              const isBooked = !!booking;
 
   return (
     <td
@@ -171,7 +272,7 @@ const getBookingForSlot = (dayIndex, hour) => {
   </div>
 
 {/* Start time */}
-      <div>
+      <div className="mt-5">
         <label className="block mb-2 font-semibold">
           Start Time
         </label>
@@ -188,7 +289,7 @@ const getBookingForSlot = (dayIndex, hour) => {
       </div>
 
       {/* End time */}
-      <div>
+      <div className="mt-3">
         <label className="block mb-2 font-semibold">
           End Time
         </label>
@@ -212,7 +313,7 @@ const getBookingForSlot = (dayIndex, hour) => {
       <button
         onClick={() => setShowConfirmation(true)}
         disabled={!selectedRoom || !startTime || !endTime}
-        className="bg-black text-white px-4 py-2 rounded-xl"
+        className="bg-black text-white px-4 py-2 rounded-xl mt-5"
       >
         Reserve Room
       </button>
