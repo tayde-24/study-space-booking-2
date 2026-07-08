@@ -10,13 +10,14 @@ const router = express.Router();
 // GET all rooms
 router.get("/", async (req, res) => {
   try {
+    const buildingId = req.query.buildingId;
+    const where = buildingId ? { buildingId: Number(buildingId) } : {};
+
     const rooms = await prisma.room.findMany({
       orderBy: {
         name: "asc"
       },
-      where: {
-        buildingId: Number(req.query.buildingId),
-      }
+      where
     })
 
     res.json(rooms)

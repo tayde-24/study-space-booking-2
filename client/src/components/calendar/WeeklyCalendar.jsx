@@ -26,6 +26,27 @@ export default function WeeklyCalendar({
     isHourBooked
 }) {
   const isHourBookedSlot = typeof isHourBooked === "function" ? isHourBooked : () => false;
+
+  const isPastSlot = (dayIndex, hour) => {
+    const now = new Date();
+
+
+    // Get start of current displayed week
+    const today = new Date();
+    const currentDay = today.getDay();
+
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - currentDay + dayIndex + weekOffset * 7);
+    
+    //Build slot date
+    // const slotDate = new Date(weekStart);
+    const slotDate = getSlotDate(dayIndex, hour);
+    // slotDate.setHours(hour, 0, 0, 0);
+    // slotDate.setDate(weekStart.getDate() + dayIndex);
+
+    // return slotDate < now;
+    return slotDate < new Date();
+  }
   
   console.log("WeeklyCalendar isHourBooked:", typeof isHourBooked);
     const hours = Array.from({ length: 15 }, (_, i) => i + 8);
@@ -42,21 +63,56 @@ export default function WeeklyCalendar({
     minute: "2-digit",
     // hour12: true
   })
+
+  
 }
 
+
 const getBookingForSlot = (dayIndex, hour) => {
+    const weekStart = getWeekStart();
+
+    const slotDate = new Date(weekStart);
+    slotDate.setDate(weekStart.getDate() + dayIndex);
+    slotDate.setHours(hour, 0, 0, 0);
+
       return weeklySchedule.find((booking) => {
         const start = new Date(booking.startTime);
         const end = new Date(booking.endTime);
         return (
-          start.getDay() === dayIndex &&
+          //start.getDay() === dayIndex &&
+          start.toDateString() === slotDate.toDateString() && 
           hour >= start.getHours() &&
           hour < end.getHours()
         );
       });
     }
 
-        return (
+    const getWeekStart = () => {
+      const today = new Date();
+      //const day = today.getDay(); // 0 (Sun) to 6 (Sat)
+
+      //const mondayOffset = today.getDate() - day + (weekOffset * 7); // Adjust for Sunday
+      //const start = new Date(today);
+      const start = new Date(today);
+      // start.setDate(mondayOffset);
+      start.setDate(today.getDate() - today.getDay() + weekOffset * 7);;
+      start.setHours(0, 0, 0, 0);
+
+      return start;
+    
+    }
+
+    const getSlotDate = (dayIndex, hour) => {
+      const weekStart = getWeekStart();
+
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + dayIndex);
+      date.setHours(hour, 0, 0, 0);
+
+      return date;
+    };
+
+    return (
 
             <div>
 <div className="overflow-x-auto">
@@ -132,6 +188,7 @@ const getBookingForSlot = (dayIndex, hour) => {
 
   <div className="grid grid-cols-2 gap-4 mb-6 mt-5">
 
+{/* //Try to fix here, numbers are lagging*/}
   <div className="bg-green-50 p-4 rounded-lg">
 
     <div className="text-sm">
@@ -180,14 +237,17 @@ const getBookingForSlot = (dayIndex, hour) => {
   <div className="flex justify-between items-center mb-4 mt-5">
 
   <button
-    onClick={() => setWeekOffset(prev => prev - 1)}
-    className="px-3 py-1 border rounded hover:bg-gray-100 transition-all"
-  >
-    ← Prev Week
-  </button>
+    onClick={() => setWeekOffset(prev => Math.max(0, prev - 1))}
+  disabled={weekOffset === 0}
+  className={`px-3 py-1 border rounded transition-all
+    ${weekOffset === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}
+  `}
+>
+  ← Prev Week
+</button>
 
   <h2 className="font-bold">
-    Week {weekOffset === 0 ? "(Current)" : weekOffset}
+    Week {weekOffset === 0 ? "Current" : `${weekOffset}`}
   </h2>
 
   <button
@@ -236,11 +296,14 @@ const getBookingForSlot = (dayIndex, hour) => {
             {days.map((_, dayIndex) => {
               const booking = getBookingForSlot(dayIndex, hour);
               const isBooked = !!booking;
+              const isPast = isPastSlot(dayIndex, hour);
 
   return (
     <td
       key={`${dayIndex}-${hour}`}
-      onClick={() => handleSlotClick(dayIndex, hour)}
+      onClick={ () => {
+        if (isPast || isBooked) return;
+        handleSlotClick(dayIndex, hour)}}
       title={
         booking
           ? `Reserved ${new Date(
@@ -252,11 +315,14 @@ const getBookingForSlot = (dayIndex, hour) => {
       }
       className={`
         border p-2 text-center cursor-pointer
+        ${isPast ? "bg-gray-200 cursor-not-allowed" : ""}
+        ${!isPast && !isBooked ? "hover:bg-green-200 bg-green-100" : ""}
+        ${isPast && isBooked ? "bg-red-200" : ""}
         ${isBooked ? "bg-red-100" : "bg-green-100"}
         ${selectedSlot === `${dayIndex}-${hour}` ? "ring-2 ring-blue-500" : ""}
       `}
     >
-      {isBooked ? "🔴" : "🟢"}
+      {isPast ? "⚪" : isBooked ? "🔴" : "🟢"}
     </td>
   );
     })}

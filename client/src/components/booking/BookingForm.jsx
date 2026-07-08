@@ -85,7 +85,17 @@ const getWeekStart = (offset = 0) => {
 
 const fetchWeeklySchedule = async () => {
     try {
-      const res = await api.get(`/bookings/week/${selectedRoom?.id}`);
+
+      const res = await api.get(`/bookings/week/${selectedRoom?.id}`,
+        {
+          params: {
+            weekOffset
+          }
+        }
+      );
+      setWeeklySchedule(res.data);
+
+      //const res = await api.get(`/bookings/week/${selectedRoom?.id}`);
       setWeeklySchedule(res.data);
     } catch (error) {
       console.error("Error fetching weekly schedule:", error);
@@ -274,6 +284,7 @@ const formatForDateTimeLocal = (date) => {
     }
 
     const fetchBookings = async () => {
+      //possibly here
       try {
         const res = await api.get(`/bookings/room/${selectedRoom?.id}`);
         setBookings(res.data);
@@ -383,32 +394,41 @@ useEffect(() => {
 
 }, [selectedRoom]);
 
+// useEffect(() => {
+//   if (!selectedRoom) {
+//     setWeeklySchedule([]);
+//     return;
+//   }
+
+//   const fetchWeeklySchedule = async () => {
+//     try {
+//       console.log("selectedRoom:", selectedRoom);
+//       console.log("selectedRoom type:", typeof selectedRoom);
+//       const res = await api.get(`/bookings/week/${selectedRoom?.id}`,
+//         {
+//           params: {
+//             weekOffset
+//           }
+//         }
+//       );
+//       setWeeklySchedule(res.data);
+//     } catch (error) {
+//       console.error("Error fetching weekly schedule:", error);
+//        //setWeeklySchedule([]);
+//     }
+//   }
+//   fetchWeeklySchedule();
+// }, [schedule]);
+
+
+
 useEffect(() => {
   if (!selectedRoom) {
     setWeeklySchedule([]);
-    return;
+    return
   }
-
-  const fetchWeeklySchedule = async () => {
-    try {
-      console.log("selectedRoom:", selectedRoom);
-console.log("selectedRoom type:", typeof selectedRoom);
-      const res = await api.get(`/bookings/week/${selectedRoom?.id}`);
-      setWeeklySchedule(res.data);
-    } catch (error) {
-      console.error("Error fetching weekly schedule:", error);
-       //setWeeklySchedule([]);
-    }
-  }
-  fetchWeeklySchedule();
-}, [schedule]);
-
-
-
-useEffect(() => {
-  if (!selectedRoom) return
   fetchWeeklySchedule()
-}, [selectedRoom, weekOffset])
+}, [selectedRoom, weekOffset]);
 
 useEffect(() => {
   const fetchAvailability = async () => {

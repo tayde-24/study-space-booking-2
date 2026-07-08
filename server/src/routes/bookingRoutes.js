@@ -79,7 +79,21 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const bookings = await prisma.booking.findMany();
+        const now = new Date();
+
+        // const bookings = await prisma.booking.findMany();
+        const bookings = await prisma.booking.findMany({
+            where: {
+                endTime: {
+                    gte: now 
+                }
+            },
+            orderBy: {
+                startTime: 'asc'
+            }
+            
+        }
+    );
         res.json(bookings);
     } catch (error) {
         console.error("Error fetching bookings:", error);
@@ -179,13 +193,24 @@ router.get('/schedule/:roomId', async (req, res) => {
 router.get('/week/:roomId', async (req, res) => {
     try {
         const roomId = Number(req.params.roomId);
+        const weekOffset = Number(req.query.weekOffset) || 0; // Get weekOffset from query params, default to 0
+
         const today = new Date();
 
         const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay()); // Set to Sunday
+        weekStart.setDate(today.getDate() - today.getDay() + weekOffset * 7); // Set to Sunday of the current week
         weekStart.setHours(0, 0, 0, 0); // Start of the day
+
         const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 7); // End of the week
+        weekEnd.setDate(weekStart.getDate() + 7);
+        // const roomId = Number(req.params.roomId);
+        // const today = new Date();
+
+        // const weekStart = new Date(today);
+        // weekStart.setDate(today.getDate() - today.getDay()); // Set to Sunday
+        // weekStart.setHours(0, 0, 0, 0); // Start of the day
+        // const weekEnd = new Date(weekStart);
+        // weekEnd.setDate(weekStart.getDate() + 7); // End of the week
 
         const bookings = await prisma.booking.findMany({
             where: {
