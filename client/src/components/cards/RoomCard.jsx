@@ -3,9 +3,9 @@ import Image from "next/image";
 export default function RoomCard({ room, onSelect, selected }) {
     return (
         <div 
-        onClick={() => onSelect(room)}
-        //className="border rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition" 
-        className={`border rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition
+        onClick={() => onSelect(room)} 
+        className={`bg-gray-50 shadow-md rounded-xl overflow-hidden cursor-pointer hover:shadow-xl 
+          
             ${selected ? "ring-2 ring-blue-500": ""}`}
         >
             <div className="relative w-full h-40">
@@ -25,36 +25,6 @@ export default function RoomCard({ room, onSelect, selected }) {
             <p className="text-gray-500 text-sm">
                 Capacity: {room.capacity}
             </p>
-            {/* <p className="text-gray-600 text-sm">
-                {room.description}
-            </p> */}
-
-            {/* <div className="flex flex-wrap gap-2 mt-2">
-          {room.amenities?.slice(0, 3).map((a) => (
-            <span
-              key={a}
-              className="text-xs bg-gray-100 px-2 py-1 rounded-full"
-            >
-              {a}
-            </span>
-          ))}
-        </div> */}
-        {/* <div className="flex flex-wrap gap-2 mt-2">
-  {room?.amenities ? (
-    room.amenities.split(",").map((a) => (
-      <span
-        key={a.trim()}
-        className="text-xs bg-gray-100 px-2 py-1 rounded-full"
-      >
-        {a.trim()}
-      </span>
-    ))
-  ) : (
-    <span className="text-sm text-gray-500">
-      No amenities listed.
-    </span>
-  )}
-</div> */}
         
             </div>
         </div>

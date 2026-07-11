@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import {useMemo} from "react";
 
 export default function WeeklyCalendar({
     room,
@@ -52,6 +53,23 @@ export default function WeeklyCalendar({
     const hours = Array.from({ length: 15 }, (_, i) => i + 8);
 
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    const {availableSlots, reservedSlots} = useMemo(() => {
+
+      const totalSlots = days.length * hours.length;
+      const reserved = weeklySchedule.reduce((count, booking) => {
+        const start = new Date(booking.startTime);
+        const end = new Date(booking.endTime);
+
+      return count + (end.getHours() - start.getHours());
+    }, 0);
+
+      return {
+        availableSlots: totalSlots - reserved, 
+        reservedSlots: reserved};
+    }, [weeklySchedule]);
+    
+
     const formatHour = (hour) => {
   return new Date(
     2026,
@@ -115,21 +133,14 @@ const getBookingForSlot = (dayIndex, hour) => {
     return (
 
             <div>
-<div className="overflow-x-auto">
+<div className="overflow-x-auto ">
 
     <div className="p-4 grid grid-cols-2 text-wrap gap-4">
 
-            {/* <Image
-              src={selectedRoom?.imageUrl}
-              alt={selectedRoom?.name}
-              width={600}
-              height={400}
-              className="w-full rounded-lg mb-4 object-cover"
-            /> */}
             <img
             src={selectedRoom?.imageUrl}
             alt={selectedRoom?.name}
-            className="w-full rounded"
+            className="w-full rounded shadow-sm"
             />
 
             <div className="ml-5">
@@ -177,19 +188,13 @@ const getBookingForSlot = (dayIndex, hour) => {
           )}
           </div>
 
-          
-                
-            
-            {/* <div className="flex flex-wrap gap-2 mt-3">
-               
-        </div> */}
     </div>
 
 
   <div className="grid grid-cols-2 gap-4 mb-6 mt-5">
 
 {/* //Try to fix here, numbers are lagging*/}
-  <div className="bg-green-50 p-4 rounded-lg">
+  <div className="bg-green-50 p-4 rounded-lg shadow-md">
 
     <div className="text-sm">
       Available Slots
@@ -197,19 +202,13 @@ const getBookingForSlot = (dayIndex, hour) => {
 
     <div className="text-2xl font-bold">
       {
-        // hours.filter(
-        //   hour => !isHourBooked(hour)
-        // ).length
-        // hours.filter(hour => !isHourBooked(dayIndex, hour)).length
-        hours.filter(hour =>
-          days.every((_, dayIndex) => !isHourBookedSlot(dayIndex, hour))
-          ).length
+        availableSlots
       }
     </div>
 
   </div>
 
-<div className="bg-red-50 p-4 rounded-lg">
+<div className="bg-red-50 p-4 rounded-lg shadow-md">
 
     <div className="text-sm">
       Reserved Slots
@@ -217,9 +216,7 @@ const getBookingForSlot = (dayIndex, hour) => {
 
     <div className="text-2xl font-bold">
       {
-        hours.filter(
-          hour => isHourBookedSlot(hour)
-        ).length
+        reservedSlots
       }
     </div>
 
@@ -239,7 +236,7 @@ const getBookingForSlot = (dayIndex, hour) => {
   <button
     onClick={() => setWeekOffset(prev => Math.max(0, prev - 1))}
   disabled={weekOffset === 0}
-  className={`px-3 py-1 border rounded transition-all
+  className={`px-3 py-1 border rounded transition duration-300 shadow-sm
     ${weekOffset === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}
   `}
 >
@@ -252,7 +249,7 @@ const getBookingForSlot = (dayIndex, hour) => {
 
   <button
     onClick={() => setWeekOffset(prev => prev + 1)}
-    className="px-3 py-1 border rounded"
+    className="px-3 py-1 border rounded transition duration-400 hover:bg-gray-100 shadow-sm"
   >
     Next Week →
   </button>
@@ -263,7 +260,7 @@ const getBookingForSlot = (dayIndex, hour) => {
 
       <thead>
 
-        <tr className="bg-gray-100 text-sm">
+        <tr className="bg-gray-300 text-sm">
 
           <th className="border p-2">
             Time
@@ -314,10 +311,11 @@ const getBookingForSlot = (dayIndex, hour) => {
           : "Available"
       }
       className={`
-        border p-2 text-center cursor-pointer
+        border p-2 text-center cursor-pointer transition duration-300
         ${isPast ? "bg-gray-200 cursor-not-allowed" : ""}
-        ${!isPast && !isBooked ? "hover:bg-green-200 bg-green-100" : ""}
+        ${!isPast && !isBooked ? "hover:bg-green-200 bg-green-50" : ""}
         ${isPast && isBooked ? "bg-red-200" : ""}
+        
         ${isBooked ? "bg-red-100" : "bg-green-100"}
         ${selectedSlot === `${dayIndex}-${hour}` ? "ring-2 ring-blue-500" : ""}
       `}
@@ -349,7 +347,7 @@ const getBookingForSlot = (dayIndex, hour) => {
           onChange={(e) =>
             setStartTime(e.target.value)
           }
-          className="border rounded-lg p-2 w-full"
+          className="border rounded-lg p-2 w-full transition duration-300 hover:shadow-lg"
         />
 
       </div>
@@ -366,165 +364,20 @@ const getBookingForSlot = (dayIndex, hour) => {
           onChange={(e) =>
             setEndTime(e.target.value)
           }
-          className="border rounded-lg p-2 w-full"
+          className="border rounded-lg p-2 w-full transition duration-300 hover:shadow-lg"
         />
 
       </div> 
 
       {/* Submit */}
-      {/* <button
-        onClick={handleBooking}
-        className="bg-black text-white px-4 py-2 rounded-xl"
-      > */}
       <button
         onClick={() => setShowConfirmation(true)}
         disabled={!selectedRoom || !startTime || !endTime}
-        className="bg-black text-white px-4 py-2 rounded-xl mt-5"
+        className="bg-black text-white px-4 py-2 rounded-xl mt-5 shadow-md transition duration-300 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Reserve Room
       </button>
 
 </div>
-    //         <div>
-    //   {/* Week Navigation */}
-    //   <div className="flex justify-between items-center mb-4">
-    //     <button
-    //       onClick={() => setWeekOffset((prev) => prev - 1)}
-    //       className="px-4 py-2 border rounded"
-    //     >
-    //       Previous Week
-    //     </button>
-
-    //     <h2 className="font-semibold text-lg">
-    //       {selectedRoom?.name || "Select a Room"}
-    //     </h2>
-
-    //     <button
-    //       onClick={() => setWeekOffset((prev) => prev + 1)}
-    //       className="px-4 py-2 border rounded"
-    //     >
-    //       Next Week
-    //     </button>
-    //   </div>
-
-    //   {/* Calendar Grid */}
-    //   <div className="overflow-auto">
-    //     <div
-    //       className="grid"
-    //       style={{
-    //         gridTemplateColumns: "80px repeat(7, 1fr)",
-    //       }}
-    //     >
-    //       {/* Header */}
-    //       <div className="border p-2 font-semibold">
-    //         Time
-    //       </div>
-
-    //       {days.map((day) => (
-    //         <div
-    //           key={day}
-    //           className="border p-2 font-semibold text-center"
-    //         >
-    //           {day}
-    //         </div>
-    //       ))}
-
-    //       {/* Time Slots */}
-    //       {hours.map((hour) => (
-    //         <React.Fragment key={hour}>
-    //           <div className="border p-2 text-sm">
-    //             {hour}:00
-    //           </div>
-
-    //           {days.map((_, dayIndex) => {
-    //             const booked = isSlotBooked(dayIndex, hour);
-
-    //             return (
-    //               <div
-    //                 key={`${dayIndex}-${hour}`}
-    //                 onClick={() =>
-    //                   !booked &&
-    //                   handleSlotClick(dayIndex, hour)
-    //                 }
-    //                 className={`
-    //                   border h-12 cursor-pointer
-    //                   transition-colors
-    //                   ${
-    //                     booked
-    //                       ? "bg-red-200"
-    //                       : "hover:bg-green-100"
-    //                   }
-    //                 `}
-    //               />
-    //             );
-    //           })}
-    //         </React.Fragment>
-    //       ))}
-    //     </div>
-    //   </div>
-    // </div>
-        //     <div>
-        //         {/* Header */}
-        //         <div className="flex justify-between items-center mb-4">
-        //             <button
-        //                 onClick={onPrevWeek}
-        //                 className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        //             >
-        //                 Previous Week
-        //             </button>
-
-        //             <h2 className="text-lg font-semibold">
-        //                 {room?.name || "Select a Room" }
-        //             </h2>
-
-        //             <button
-        //                 onClick={onNextWeek}
-        //                 className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        //             >
-        //                 Next Week
-        //             </button>
-        //         </div>
-
-        //         {/* Calendar Grid */}
-        //         <div className="overflow-x-auto">
-        //             <table className="w-full border-collapse">
-        //                 <thead>
-        //                     <tr>
-        //                         <th className="border p-2">Time</th>
-        //                         {days.map((day) => (
-        //                             <th key={day} className="border p-2">
-        //                                 {day} <br />
-        //                                 {/* {new Date(weekStart.getTime() + index * 24 * 60 * 60 * 1000).toLocaleDateString()} */}
-        //                             </th>
-        //                         ))}
-        //                     </tr>
-        //                 </thead>
-
-        //                 <tbody>
-        //                     {hours.map((hour) => (
-        //                         <tr key={hour}>
-        //                             <td className="border p-2 font-medium">
-        //                                 {hour}:00
-        //                             </td>
-
-        //                             {days.map((_, dayIndex) => {
-        //                                 const booked = isSlotBooked(dayIndex, hour);
-        //                                 return (
-        //                                     <td
-        //                                         key={`${dayIndex} - ${hour}`}
-        //                                         onClick={() => !booked && onSlotClick(dayIndex, hour)}
-        //                                         className={`border p-2 cursor-pointer ${booked ? "bg-red-200" : "hover:bg-blue-100"}`}
-        //                                     >
-        //                                         {booked ? "Booked" : "Available"}
-        //                                     </td>
-        //                                 );
-        //                             })}
-        //                         </tr>
-        //                     ))}
-        //                 </tbody>
-        //             </table>
-
-        //     </div>
-        // </div>
     );
 }

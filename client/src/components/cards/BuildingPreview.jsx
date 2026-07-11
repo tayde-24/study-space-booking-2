@@ -12,7 +12,7 @@ export default function BuildingPreview({building, onViewRooms,}) {
     }
 
     return (
-        <div className="border rounded-xl overflow-hidden shadow-md">
+        <div className="rounded-xl overflow-hidden shadow-lg bg-white">
 
         {/**Image */}
         <img

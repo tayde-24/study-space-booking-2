@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import AdminBuildingCard from "@/components/admin/AdminBuildingCard";
 
 export default function AdminBuildingsPage() {
     const [name, setName] = useState("");
     const [buildings, setBuildings] = useState([]);
+    
 
     const fetchBuildings = async() => {
         const res = await fetch(
@@ -41,6 +43,16 @@ export default function AdminBuildingsPage() {
         fetchBuildings();
     };
 
+    //Check to see if I did this right
+    const editBuilding = async(id) => {
+        await fetch(`http://localhost:3001/admin/buildings/${id}`,
+            {
+                method: "PUT",
+                credentials: "include"
+            }
+        );
+    }
+
     const createBuilding = async () => {
         await fetch("http://localhost:3001/admin/buildings", {
             method: "POST",
@@ -63,21 +75,31 @@ export default function AdminBuildingsPage() {
                 Manage Buildings
             </h1>
 
-            <input
+            {/* <input
                     type="text"
                     placeholder="Building Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="border p-2 rounded mb-2"
-                />
+                /> */}
             <button
-                    onClick={createBuilding}
+                    //onClick={createBuilding}
                     className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
                 >
                     Create Building
                 </button>
 
-            {buildings.map((building) => (
+                <div className="grid gap-6 xl:grid-cols-3 md:grid-cols-2 sm:grid-cols-1  mt-6">
+                    {buildings.map((building) =>(
+                        <AdminBuildingCard
+                        key={building.id}
+                        building={building}
+                        // onEdit={handleEdit}
+                        onDelete={deleteBuilding}/>
+                    ))}
+                </div>
+
+            {/* {buildings.map((building) => (
 
         <div
           key={building.id}
@@ -103,7 +125,7 @@ export default function AdminBuildingsPage() {
 
         </div>
 
-      ))}
+      ))} */}
         </div>
     )
 }

@@ -10,15 +10,23 @@ const router = express.Router();
 // GET all rooms
 router.get("/", async (req, res) => {
   try {
+    console.log("Fetching rooms with query:", req.query); // Log the query parameters
     const buildingId = req.query.buildingId;
     const where = buildingId ? { buildingId: Number(buildingId) } : {};
+    console.log("buildingId:", buildingId, "where clause:", where); // Log the buildingId and where clause
+    
 
     const rooms = await prisma.room.findMany({
       orderBy: {
         name: "asc"
       },
+      include: {
+        building: true
+      },
       where
     })
+
+    console.log("Rooms returned:", rooms.length); // Log the fetched rooms
 
     res.json(rooms)
   } catch (err) {

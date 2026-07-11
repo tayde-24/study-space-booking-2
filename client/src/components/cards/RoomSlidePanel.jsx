@@ -13,8 +13,6 @@ export default function RoomSlidePanel({
 }
 
 ) {
-  console.log("BUILDING:", building);
-console.log("ROOMS:", rooms);
   return (
     <>
       {/* Backdrop */}

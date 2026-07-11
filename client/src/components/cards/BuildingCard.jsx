@@ -4,8 +4,8 @@ export default function BuildingCard({ building, onSelect, isSelected }) {
     return (
         <div
             className={`
-      border rounded-xl overflow-hidden cursor-pointer
-      hover:shadow-lg transition
+      shadow-md rounded-xl overflow-hidden cursor-pointer
+      hover:shadow-2xl transition duration-300
       ${isSelected ? "ring-2 ring-blue-500" : ""}
       
     `}
@@ -21,24 +21,10 @@ export default function BuildingCard({ building, onSelect, isSelected }) {
             />
             </div>
 
-            <div className="p-4">
+            <div className="p-4 bg-white">
             <h2 className="font-bold text-lg mt-3 mb-2">
                 {building.name}
             </h2>
-            {/* <p className="text-gray-600">
-                {building.description}
-            </p> */}
-
-            {/* <div className="flex flex-wrap gap-2 mt-3">
-          {building.amenities?.slice(0, 3).map((a) => (
-            <span
-              key={a}
-              className="text-xs bg-gray-100 px-2 py-1 rounded-full"
-            >
-              {a}
-            </span>
-          ))}
-        </div> */}
         
             </div>
         </div>

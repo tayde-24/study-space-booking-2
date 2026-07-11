@@ -1,5 +1,4 @@
 import express from "express";
-import passport from "passport";
 import { requireAdmin } from "../../middleware/auth.js";
 import prisma from "../../utils/prisma.js";
 
@@ -7,13 +6,24 @@ const router = express.Router();
 
 router.get("/", requireAdmin, async (req, res) => {
     try {
+        const { buildingId } = req.query;
+
+        const where = buildingId
+            ? { buildingId: Number(buildingId) }
+            : {};
+
         const rooms = await prisma.room.findMany({
+            where,
             include: {
                 building: true
+            },
+            orderBy: {
+                name: "asc"
             }
         });
 
         res.json(rooms);
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to fetch rooms" });
@@ -22,31 +32,39 @@ router.get("/", requireAdmin, async (req, res) => {
 
 router.post("/", requireAdmin, async (req, res) => {
     console.log(req.body);
-    const { name, capacity, buildingId } = req.body;
+    const { name, capacity, buildingId, description, amenities } = req.body;
     try{
         const room = await prisma.room.create({
         data: {
             name,
+            imageUrl: req.body.imageUrl || "/rooms/default-room.jpg",
             capacity: Number(capacity),
-            buildingId: Number(buildingId)
+            buildingId: Number(buildingId),
+            capacity: Number(capacity),
+            description,
+            amenities,
+            
         }
     })
     res.json(room);
     } catch (err) {
-        cosole.error(err);
+        console.error(err);
         res.status(500).json({ error: "Failed to create room" });
     }
 })
 
 router.put("/:id", requireAdmin, async (req, res) => {
-    const { name, capacity, buildingId } = req.body;
+    const { name, imagesUrl, capacity, buildingId, description, amenities, } = req.body;
     try{
         const room = await prisma.room.update({
         where: { id: Number(req.params.id) },
         data: {
             name,
+            imageUrl: req.body.imageUrl || "/rooms/default-room.jpg",
             capacity: Number(capacity),
-            buildingId: Number(buildingId)
+            buildingId: Number(buildingId),
+            description,
+            amenities
         }
     })
     res.json(room);
@@ -56,14 +74,15 @@ router.put("/:id", requireAdmin, async (req, res) => {
     }
 })
 
-router.delete("/:id", requireAdmin, async (res, req) => {
+router.delete("/:id", requireAdmin, async (req, res) => {
     try {
     await prisma.room.delete({
         where: {id: Number(req.params.id)}
-    })
+    });;
 
-    res.json({ success: true });
-    return res.message("Room deleted successfully");
+    res.json({ success: true,
+        message: "Room deleted successfully" });
+    // return res.message("Room deleted successfully");
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to delete room" });

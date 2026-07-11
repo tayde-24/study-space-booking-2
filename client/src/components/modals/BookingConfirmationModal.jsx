@@ -20,30 +20,7 @@ export default function BookingConfirmationModal ({
                     Confirm Reservation
                 </h2>
 
-                {/* <div className="space-y-3 mb-6">
-                    <p>
-                        <strong>Building: </strong>
-                        {selectedBuilding?.name}
-                    </p>
-
-                    
-                    <p>
-                        <strong>Room: </strong>
-                        {selectedRoom?.name}
-                    </p>
-
-                    <p>
-                        <strong>Start: </strong>
-                        {new Date(startTime).toLocaleString()}
-                    </p>
-
-                    <p>
-                        <strong>End: </strong>
-                        {new Date(endTime).toLocaleString()}
-                    </p>
-                </div> */}
-
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-blue-50 rounded-lg p-4 mb-4 shadow-lg">
                     <Image
                       src={selectedRoom?.imageUrl}
                       alt={selectedRoom?.name}
@@ -55,17 +32,29 @@ export default function BookingConfirmationModal ({
                       Reservation Details
                     </h3>
 
-                    <p>🏢 {selectedBuilding?.name}</p>
-                    <p>🚪 {selectedRoom?.name}</p>
-                    <p>👥 Capacity: {selectedRoom?.capacity}</p>
-                    <p>
+                    <p>🏢 <strong>Building:</strong> {selectedBuilding?.name}</p>
+                    <p>🚪 <strong>Room:</strong> {selectedRoom?.name}</p>
+                    <p>👥 <strong>Capacity:</strong> {selectedRoom?.capacity}</p>
+                    <p className="mt-4">
                         <strong>Start: </strong>
-                        {new Date(startTime).toLocaleString()}
+                        {new Date(startTime).toLocaleString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true
+                            })}
                     </p>
 
                     <p>
                         <strong>End: </strong>
-                        {new Date(endTime).toLocaleString()}
+                        {new Date(endTime).toLocaleString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true
+                            })}
                     </p>
                 </div>
 
@@ -73,13 +62,13 @@ export default function BookingConfirmationModal ({
                 <div className="flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 border rounded">
+                        className="px-4 py-2 border rounded transition duration-300 hover:bg-gray-200">
                         Cancel
                     </button>
 
                     <button
                         onClick={onConfirm}
-                        className="px-4 py-2 bg-blue-600 text-white rounded">
+                        className="px-4 py-2 bg-blue-600 text-white rounded transition duration-300 hover:bg-blue-700">
                         Confirm Booking
                     </button>
 
