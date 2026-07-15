@@ -32,10 +32,18 @@ router.get("/", requireAdmin, async (req, res) => {
 router.delete("/:id", requireAdmin, async (req, res) => {
 
     try{
+    //     await prisma.booking.delete({
+    //     where: { id: Number(req.params.id)}
+    // })
+    const bookingId = Number(req.params.id);
+
         await prisma.booking.delete({
-        where: { id: Number(req.params.id)}
-    })
-    res.json({ success: true })
+            where: {
+                id: bookingId,
+            },
+        });
+
+        res.json({ success: true });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to delete booking" });

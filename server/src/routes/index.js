@@ -7,6 +7,7 @@ import authRoutes from './authRoutes.js';
 import adminRoomRoutes from './admin/adminRooms.js';
 import adminBookingRoutes from './admin/adminBooking.js';
 import adminBuildingRoutes from './admin/adminBuildings.js';
+import adminStatsRoutes from './admin/dashboard/stats.js';
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.use('/buildings', buildingRoutes);
 router.use('/admin/rooms', adminRoomRoutes);
 router.use('/admin/bookings', adminBookingRoutes);
 router.use('/admin/buildings', adminBuildingRoutes);
+router.use('/admin/dashboard', adminStatsRoutes);
 
 // router.get('/auth', authRoutes);
 

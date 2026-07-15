@@ -22,9 +22,14 @@ router.get("/", requireAdmin, async (req, res) => {
 
 router.post("/", requireAdmin, async (req, res) => {
     try{
-        const {name} = req.body;
+        const {name, imageUrl, location, description} = req.body;
         const building = await prisma.building.create({
-        data: {name}
+        data: {
+            name,
+            imageUrl: imageUrl || "/buildings/placeholder_building.png",
+            location: location || null,
+            description: description || null
+        }
     });
 
     res.json(building);
@@ -35,17 +40,52 @@ router.post("/", requireAdmin, async (req, res) => {
     
 });
 
+router.put("/:id", requireAdmin, async (req, res) => {
+    try{
+        const { name, imageUrl, location, description } = req.body;
+        const building = await prisma.building.update({
+            where: { id: Number(req.params.id) },
+            data: {
+                name,
+                imageUrl: imageUrl || "/buildings/placeholder_building.png",
+                location: location || null,
+                description: description || null
+            }
+        });
+        res.json(building);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to update building" });
+    }
+});
+
 router.delete("/:id", requireAdmin, async (req, res) => {
 
     try {
-        await prisma.building.delete({
-        where: { id: Number(req.params.id)}
-    })
+        const buildingId = Number(req.params.id);
+    await prisma.$transaction([
+        prisma.booking.deleteMany({
+            where: {
+                room: {
+                    buildingId: buildingId
+                }
+            }
+    }),
 
+    prisma.room.deleteMany({
+        where: {
+            buildingId: buildingId
+        }
+    }),
+
+    prisma.building.delete({
+        where: { id: buildingId }
+    })])
+    
     res.json({ success: true })
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Failed to delete building" });
+        res.status(500).json({ error: "Failed to delete booking" });
     }
 
 })

@@ -1,40 +1,31 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export default function RoomForm({ room, buildings, onSubmit, onCancel}) {
+export default function RoomForm({building, onSubmit, onCancel}) {
     const [formData, setFormData] = useState({
         name: "",
         imageUrl: "",
-        capacity: "",
-        // buildingId: Number(buildings.length > 0 ? buildings[0].id : ""),
-        buildingId: "",
+        location: "",
         description: "",
-        amenities: "",
     });
 
     useEffect(() => {
-        if (room) {
+        if (building) {
             setFormData({
-                name: room.name || "",
-                imageUrl: room.imageUrl || "",
-                capacity: room.capacity || "",
-                // buildingId: room.buildingId || Number(buildings.length > 0 ? buildings[0].id : ""),
-                buildingId: room.buildingId || "",
-                description: room.description || "",
-                amenities: room.amenities || "",
+                name: building.name || "",
+                imageUrl: building.imageUrl || "",
+                location: building.location || "",
+                description: building.description || "",
             });
         } else {
             setFormData({
                 name: "",
                 imageUrl: "",
-                capacity: "",
-                // buildingId: Number(buildings.length > 0 ? buildings[0].id : ""),
-                buildingId: "",
+                location: "",
                 description: "",
-                amenities: "",
             });
         }
-            }, [room, buildings]);
+            }, [building]);
 
         const handleChange = (e) => {
             setFormData({
@@ -52,20 +43,20 @@ export default function RoomForm({ room, buildings, onSubmit, onCancel}) {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-100">
             <div className="bg-white p-6 rounded-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">
-                {room ? "Edit Room" : "Create New Room"}
+                {building ? "Edit Building" : "Create New Building"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Field goes here */}
                 <img className=" h-40 m-auto rounded-lg mb-4 object-cover w-full"
-                    src={room?.imageUrl || "/rooms/placeholder_room.png"}
-                    alt={room?.name || "Room Image"}
+                    src={building?.imageUrl || "/buildings/placeholder_building.png"}
+                    alt={building?.name || "Building Image"}
                 />
 
                 <input
                     name="name"
                     value={formData.name} 
                     onChange={handleChange}
-                    placeholder="Room Name"
+                    placeholder="Building Name"
                     className="border p-2 rounded-lg w-full
                     onFocus:outline-none 
                     focus:bg-yellow-50 focus:transition focus:duration-300 focus:ease-in-out"
@@ -74,9 +65,9 @@ export default function RoomForm({ room, buildings, onSubmit, onCancel}) {
                 {/* {room && ( */}
                     <input 
                         name="imageUrl"
-                        value={formData.imageUrl || "/rooms/placeholder_room.png"}
+                        value={formData.imageUrl || "/buildings/placeholder_building.png"}
                         onChange={handleChange}
-                        placeholder="/rooms/placeholder_room.png"
+                        placeholder="/buildings/placeholder_building.png"
                         className="border p-2 rounded-lg w-full
                         onFocus:outline-none 
                         focus:bg-yellow-50 focus:transition focus:duration-300 focus:ease-in-out"
@@ -84,16 +75,15 @@ export default function RoomForm({ room, buildings, onSubmit, onCancel}) {
                 {/* )} */}
 
                 <input
-                    name="capacity"
-                    type="number"
-                    value={formData.capacity}
+                    name="location"
+                    value={formData.location}
                     onChange={handleChange}
-                    placeholder="Capacity"
+                    placeholder="Location"
                     className="border p-2 rounded-lg w-full onFocus:outline-none 
                     focus:bg-yellow-50 focus:transition focus:duration-300 focus:ease-in-out"
                 />
 
-                <input 
+                <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
@@ -101,33 +91,6 @@ export default function RoomForm({ room, buildings, onSubmit, onCancel}) {
                     className="border p-2 rounded-lg w-full
                     onFocus:outline-none 
                     focus:bg-yellow-50 focus:transition focus:duration-300 focus:ease-in-out"
-                />
-
-                <select
-                    name="buildingId"
-                    value={formData.buildingId}
-                    onChange={handleChange}
-                    className="border p-2 rounded-lg w-full
-                    onFocus:outline-none 
-                    focus:bg-yellow-50 focus:transition focus:duration-300 focus:ease-in-out"
-                >
-                    <option value="">Choose Building</option>
-                    {(buildings ?? []).map((building) => (
-                        <option key={building.id} value={building.id}>
-                            {building.name}
-                        </option>
-                    ))}
-                </select>
-
-                <textarea
-                    name="amenities"
-                    value={formData.amenities}
-                    onChange={handleChange}
-                    placeholder="Amenities (comma-separated)"
-                    className="border p-2 rounded-lg w-full
-                    onFocus:outline-none 
-                    focus:bg-yellow-50 focus:transition focus:duration-300 focus:ease-in-out"
-                    style={{ minHeight: "75px" }}
                 />
 
                 <div className="flex justify-end gap-3">
@@ -143,7 +106,7 @@ export default function RoomForm({ room, buildings, onSubmit, onCancel}) {
         type="submit"
         className="px-4 py-2 bg-blue-600 text-white rounded-lg"
     >
-        {room ? "Update Room" : "Create Room"}
+        {building ? "Update Building" : "Create Building"}
     </button>
 </div>
 

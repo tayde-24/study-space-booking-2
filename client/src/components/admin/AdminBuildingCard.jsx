@@ -13,7 +13,7 @@ export default function AdminBuildingCard({
                 <div className="relative h-48">
 
                     <Image
-                        src={building.imageUrl || "/default-building.jpg"}
+                        src={building.imageUrl || "/buildings/placeholder_building.png"}
                         alt={building.name}
                         fill
                         className="w-full sm:h-48 md:h-60 lg:h-100 object-cover"

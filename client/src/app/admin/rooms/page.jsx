@@ -177,18 +177,6 @@ export default function AdminRoomsPage() {
                 </div>
 
             {/* Room list */}
-            {/* {Array.isArray(rooms) && rooms.map((room) => (
-                <div 
-                    key={room.id}
-                    className="border p-4 rounded mb-2">
-                        <div className="font-bold">{room.name}</div>
-                        <div>Capacity: {room.capacity}</div>
-                        <div>Building: {room.building?.name}</div>
-                        <button onClick={() => deleteRoom(room.id)} className="bg-red-500 text-white p-1 rounded mt-2 hover:bg-red-600">
-                            Delete Room
-                        </button>
-                </div>
-            ))} */}
             {showModal && (
                     <RoomForm
                         room={editingRoom}

@@ -37,7 +37,7 @@ router.post("/", requireAdmin, async (req, res) => {
         const room = await prisma.room.create({
         data: {
             name,
-            imageUrl: req.body.imageUrl || "/rooms/default-room.jpg",
+            imageUrl: req.body.imageUrl || "/rooms/placeholder_room.png",
             capacity: Number(capacity),
             buildingId: Number(buildingId),
             capacity: Number(capacity),
@@ -60,7 +60,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
         where: { id: Number(req.params.id) },
         data: {
             name,
-            imageUrl: req.body.imageUrl || "/rooms/default-room.jpg",
+            imageUrl: req.body.imageUrl || "/rooms/placeholder_room.png",
             capacity: Number(capacity),
             buildingId: Number(buildingId),
             description,
