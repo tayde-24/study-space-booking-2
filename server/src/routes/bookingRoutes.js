@@ -155,7 +155,11 @@ router.get("/me", (req, res) => {
       userId: req.user.id
     },
     include: {
-      room: true
+      room: {
+        include: {
+          building: true
+        }
+      }
     },
     orderBy: {
       startTime: 'asc'

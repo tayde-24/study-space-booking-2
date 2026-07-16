@@ -87,7 +87,7 @@ export default function AdminLayout({children}) {
         
         <div className="flex min-h-screen">
             {/* Sidebar*/}
-            <aside className="w-64 bg-gray-900 text-white p-4">
+            <aside className="w-64 bg-gray-900 text-white p-4 sticky top-0 h-screen">
                 <h1 className="text-x1 font-bold mb-6">
                     Admin Panel
                 </h1>

@@ -44,9 +44,10 @@ export default function SideBarLayout({children}) {
     // }
     return (
         
+        // <div className="flex min-h-screen">
         <div className="flex min-h-screen">
             {/* Sidebar*/}
-            <aside className="w-64 bg-gray-900 text-white p-4">
+            <aside className="w-64 bg-gray-900 text-white p-4 sticky top-0 h-screen">
                 {/* <h1 className="text-x1 font-bold mb-6">
                     User Panel
                 </h1> */}
@@ -55,12 +56,13 @@ export default function SideBarLayout({children}) {
                     <Link href="/" className="hover:bg-gray-700 p-2 rounded">
                         Home
                     </Link>
-                    <Link href="/reservation" className="hover:bg-gray-700 p-2 rounded">
-                        Reservation
-                    </Link>
                     <Link href="/dashboard" className="hover:bg-gray-700 p-2 rounded">
                         User Dashboard
                     </Link>
+                    <Link href="/reservation" className="hover:bg-gray-700 p-2 rounded">
+                        Reservation
+                    </Link>
+                    
                     
                 </nav>
             </aside>

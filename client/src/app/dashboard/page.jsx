@@ -9,6 +9,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [bookings, setBookings] = useState([])
+  const [building, setBuilding] = useState([]);
 
   const router = useRouter()
 
@@ -112,11 +113,9 @@ useEffect(() => {
       <h1 className="text-2xl font-bold">
         Dashboard
       </h1>
-      {/* <Link href="/" className="underline text-blue-600">
-        Back to Home
-      </Link> */}
+      
       <p className="text-lg italic mt-1">Welcome, <strong>{user.name}</strong></p>
-      {/* <p>{user.email}</p> */}
+      
       <button
       onClick={logout}
       className="mt-4 rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600 transition-colors"
@@ -132,11 +131,14 @@ useEffect(() => {
             bookings.map((b) => (
         <div
             key={b.id}
-            className="border p-3 rounded mt-2"
+            className="border p-3 rounded mt-2 grid grid-cols-1 md:grid-cols-2 gap-20 mb-4"
         >
-          <div></div>
-        <p className="font-semibold">Room: {b.room?.name}</p>
-        <p>
+        <div className="ml-4 mt-3">
+        <p className="xl:text-lg md:text-md">Building: <strong><span className="text-blue-900">{b.room?.building?.name}</span></strong></p>
+        <p className="xl:text-lg md:text-md">Room: <strong><span className="text-blue-900">{b.room?.name}</span></strong></p>
+        
+        <p className="xl:text-lg md:text-md">
+          Date: <strong><span className="text-blue-900">
             {
             new Date(b.startTime).toLocaleString("en-US", {
                 month: "long",
@@ -146,6 +148,7 @@ useEffect(() => {
                 hour12: true
             })}
             {" → "}
+            
             {
             new Date(b.endTime).toLocaleString("en-US", {
                 month: "long",
@@ -154,12 +157,23 @@ useEffect(() => {
                 minute: "2-digit",
                 hour12: true
             })}
+            </span></strong>
         </p>
 
         <button onClick={handleCancelBooking.bind(null, b.id)}
-        className="mt-2 rounded-lg bg-red-500 px-3 py-1 text-white">
+        className="mt-2 rounded-lg bg-red-500 
+        px-3 py-1 text-white xl:text-lg md:text-md
+        hover:bg-red-600 transition-colors mt-10">
           Cancel Reservation
         </button>
+      </div>
+      <div className=" mt-3 mb-3 table ml-auto mr-4">
+        <img
+          src={b.room?.imageUrl || "/room/placeholder_room.png"}
+          alt="Room"
+          className="w-fill rounded-xl object-cover relative h-48"
+        />
+      </div>
       </div>
     ))
   )}
@@ -167,7 +181,9 @@ useEffect(() => {
 
     <Link
       href="/reservation"
-      className="bg-blue-600 text-white px-6 py-3 mt-10 rounded-lg transition-colors hover:bg-blue-700"
+      className="bg-blue-600 text-white px-6 py-3 
+      rounded-lg transition-colors hover:bg-blue-700
+      "
     >
       Reserve a Room
     </Link>

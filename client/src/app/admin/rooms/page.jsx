@@ -16,10 +16,20 @@ export default function AdminRoomsPage() {
     const [showModal, setShowModal] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
 
+    const [searchTerm, setSearchTerm] = useState("");
+
     useEffect(() => {
         fetchRooms();
         fetchBuildings();
     }, [])
+
+    const filterRooms = rooms.filter((room) => {
+        const search = searchTerm.toLowerCase();
+        return (
+            room.name.toLowerCase().includes(search) ||
+            room.building.name.toLowerCase().includes(search)
+        );
+    })
 
     const fetchRooms = async (buildingId = "") => {
         let url = "http://localhost:3001/admin/rooms";
@@ -171,10 +181,19 @@ export default function AdminRoomsPage() {
 
                 <input
                     type="text"
-                    placeholder="Search rooms..."
-                    className="border p-2 rounded mb-2"
+                    placeholder="Search rooms or buildings..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="
+                    w-full
+                    md:w-1/2
+                    border
+                    rounded-lg
+                    p-3
+                    dark:bg-gray-800
+                    dark:text-white"
                 />
-                </div>
+            </div>
 
             {/* Room list */}
             {showModal && (
@@ -187,7 +206,11 @@ export default function AdminRoomsPage() {
                 )}
             <div className="grid gap-6 xl:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 mt-6">
 
-                {Array.isArray(rooms) && rooms.map((room) => (
+                {/* {Array.isArray(rooms) && rooms.map((room) => ( */}
+                {filterRooms.length === 0 ? (
+                    <p className="text-gray-600 dark:text-white">No rooms found.</p>
+                ) : (
+                    Array.isArray(rooms) && filterRooms.map((room) => (
                     <AdminRoomCard
                         key={room.id}
                         room={room}
@@ -196,7 +219,7 @@ export default function AdminRoomsPage() {
                             handleEdit(room);
                         }}
                     />
-                ))}
+                )))}
 
             </div>
         </div>
