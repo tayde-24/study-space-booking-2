@@ -1,22 +1,20 @@
 import Image from "next/image";
 
-export default function RoomCard({ room, onSelect, selected }) {
+export default function RoomCardSlide({ room, onSelect, selected }) {
     return (
         <div 
         onClick={() => onSelect(room)} 
-        className={`bg-gray-50 shadow-md rounded-xl overflow-hidden 
-            cursor-pointer hover:shadow-xl transition duration-300
-            transform hover:scale-105
+        className={`bg-gray-50 shadow-md rounded-xl overflow-hidden cursor-pointer hover:shadow-xl 
           
             ${selected ? "ring-2 ring-blue-500": ""}`}
         >
-            <div className="relative w-full h-40">
+            <div className="relative w-full md:h-50 sm:h-40 xs:h-30">
             <Image
                 src={room.imageUrl || "/placeholder.jpg"}
                 alt={room.name}
                 width={300}
                 height={200}
-                className="object-cover"
+                className="object-cover w-full h-full"
             />
             </div>
 

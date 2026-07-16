@@ -1,6 +1,6 @@
 "use client";
 
-import RoomList from "./RoomList";
+import RoomListSlidePanel from "./RoomListSlidePanel";
 
 export default function RoomSlidePanel({
   isOpen,
@@ -10,9 +10,10 @@ export default function RoomSlidePanel({
   selectedRoom,
   rooms
   
-}
+})
+{
 
-) {
+  console.log("onClose function:", onClose);
   return (
     <>
       {/* Backdrop */}
@@ -24,7 +25,7 @@ export default function RoomSlidePanel({
 
       {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full md:w-[450px]
+        className={`fixed top-0 right-0 h-full w-full xxs:w-[200px] xs:w-[300px] sm:w-[400px] md:w-[450px]
         bg-white shadow-xl z-50 transition-transform duration-300
         ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
@@ -34,34 +35,19 @@ export default function RoomSlidePanel({
           </h2>
 
           <button
-            onClick={onClose}
+            // onClick={onClose}
+            onClick={() => {
+            console.log("Close button clicked");
+            onClose();
+            }}
             className="text-gray-500 hover:text-black"
           >
             ✕
           </button>
         </div>
 
-        <div className="p-6 space-y-4 overflow-y-auto h-full">
-          {/* {building?.rooms?.map((room) => (
-            <div
-              key={room.id}
-              onClick={() => onSelectRoom(room)}
-              className="border rounded-xl p-4 cursor-pointer hover:bg-gray-50"
-            >
-              <h3 className="font-semibold">
-                {room.name}
-              </h3>
-
-              <p className="text-sm text-gray-500">
-                Capacity: {room.capacity}
-              </p>
-
-              <p className="text-sm mt-2">
-                {room.description}
-              </p>
-            </div>
-          ))} */}
-          <RoomList
+        <div className="p-6 space-y-2 overflow-y-auto h-full">
+          <RoomListSlidePanel
             //rooms={rooms}
             rooms={building?.rooms || []}
             selectedRoom={selectedRoom}

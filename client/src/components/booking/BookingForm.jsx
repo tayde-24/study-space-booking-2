@@ -418,8 +418,6 @@ const handleViewRooms = () => {
   setShowRoomPanel(true);
 };
 
-console.log("selectedBuilding:", selectedBuilding);
-console.log("BookingForm isHourBooked:", typeof isHourBooked);
 
 return (
 // Probably change this part
@@ -459,7 +457,7 @@ return (
             building={selectedBuilding}
             rooms={rooms}
             selectedRoom={selectedRoom}
-            onClose={() => setShowRoomsPanel(false)}
+            onClose={() => setShowRoomPanel(false)}
             onSelectRoom={(room) => {
               handleRoomChange(room);
               setShowRoomsPanel(false);
@@ -477,7 +475,9 @@ return (
 
         <div className="p-6" >
         {selectedRoom && (
-          <div className="mt-6 p-4 border rounded-xl bg-blue-50">
+          <div className="mt-6 p-4  rounded-xl 
+          bg-white shadow-lg transition duration-300
+          ">
             <h3 className="font-semibold">
               Selected Room
             </h3>

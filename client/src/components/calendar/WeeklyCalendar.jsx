@@ -130,12 +130,30 @@ const getBookingForSlot = (dayIndex, hour) => {
       return date;
     };
 
+    const displayedWeekStart = new Date();
+      displayedWeekStart.setDate(
+      displayedWeekStart.getDate() -
+      displayedWeekStart.getDay() +
+      weekOffset * 7
+      );
+    displayedWeekStart.setHours(0, 0, 0, 0);
+
+    const displayedWeekEnd = new Date(displayedWeekStart);
+    displayedWeekEnd.setDate(displayedWeekStart.getDate() + 6);
+
+    const formatDate = (date) =>
+      date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+
     return (
 
             <div>
 <div className="overflow-x-auto ">
 
-    <div className="p-4 grid grid-cols-2 text-wrap gap-4">
+    <div className="p-4 grid xl:grid-cols-2  md:grid-cols-1 text-wrap gap-4">
 
             <img
             src={selectedRoom?.imageUrl}
@@ -231,12 +249,13 @@ const getBookingForSlot = (dayIndex, hour) => {
   </div>
 
 
-  <div className="flex justify-between items-center mb-4 mt-5">
+  <div className="flex justify-between items-center mt-5">
 
   <button
     onClick={() => setWeekOffset(prev => Math.max(0, prev - 1))}
   disabled={weekOffset === 0}
-  className={`px-3 py-1 border rounded transition duration-300 shadow-sm
+  className={`px-3 py-1 border rounded transition 
+    duration-300 shadow-sm sm:text-sm md:text-md
     ${weekOffset === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}
   `}
 >
@@ -246,14 +265,19 @@ const getBookingForSlot = (dayIndex, hour) => {
   <h2 className="font-bold">
     Week {weekOffset === 0 ? "Current" : `${weekOffset}`}
   </h2>
-
+  
   <button
     onClick={() => setWeekOffset(prev => prev + 1)}
-    className="px-3 py-1 border rounded transition duration-400 hover:bg-gray-100 shadow-sm"
+    className="px-3 py-1 border rounded transition 
+    duration-400 hover:bg-gray-100 shadow-sm
+    sm:text-sm md:text-md"
   >
     Next Week →
   </button>
     </div>
+    <p className="text-sm text-gray-500 text-center mb-4">
+    {formatDate(displayedWeekStart)} - {formatDate(displayedWeekEnd)}
+  </p>
 
     {/**Calender Table */}
     <table className="w-full border-collapse">

@@ -28,7 +28,7 @@ export default function BuildingPreview({building, onViewRooms,}) {
 
             {/**Description */}
             <div className={`overflow-hidden transition-all duration-300
-            ${expanded ? "max-h-[1000px]" : "max-h-24"}`}>
+            ${expanded ? "max-h-[1000px]" : "max-h-24 lg:max-h-40 md:max-h-65"}`}>
                 <p className="text-sm text-gray-600 mt-2 whitespace-pre-wrap"
                 //dangerouslySetInnerHTML={{ __html: building?.description ||  ""}}>
                 dangerouslySetInnerHTML={{ __html: expanded ? building?.description : building?.description?.slice(0, 180) + (building?.description?.length > 180 ? "..." : "") }}>
