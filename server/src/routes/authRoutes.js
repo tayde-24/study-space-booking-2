@@ -116,6 +116,32 @@ router.get('/logout', (req, res) => {
         }
     });
 
+router.post("/logout", (req, res) => {
+    req.logout((err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({
+                error: "Logout failed"
+            });
+        }
+
+        req.session.destroy((err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    error: "Session destruction failed"
+                });
+            }
+
+            res.clearCookie("connect.sid");
+
+            res.json({
+                success: true
+            });
+        });
+    });
+});
+
     //This code below destroys cookie and session.
 
     // req.session.destroy(() => {

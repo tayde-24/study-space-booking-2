@@ -20,6 +20,28 @@ export default function AdminLayout({children}) {
     const router = useRouter();
     const pathname = usePathname();
 
+    const logout = async () => {
+            await fetch("http://localhost:3001/auth/logout", {
+            credentials: "include"
+        })
+
+        setUser(null);
+        router.push("/login");
+        
+    }
+
+    // const handleLogout = async () => {
+    //     try {
+    //         await fetch('http://localhost:3001/auth/logout', {
+    //             method: 'POST',
+    //             credentials: 'include'
+    //         });
+    //         router.push("/login");
+    //     } catch (error) {
+    //         console.error("Error logging out:", error);
+    //     }
+    // };
+
     useEffect(() => {
         const checkAuth = async() => {
             try{
@@ -81,17 +103,7 @@ export default function AdminLayout({children}) {
                         </Link>
                     ))}
 
-                    <button onClick={async () => {
-                        try {
-                            const res = await fetch('http://localhost:3001/auth/logout', {
-                                method: 'POST',
-                                credentials: 'include'
-                            });
-                        } catch (error) {
-                            console.error("Error logging out:", error);
-                        }
-                        router.push("/login");
-                    }} className="bg-blue-700 hover:bg-blue-900 p-2 rounded transition mt-10">
+                    <button onClick={logout} className="bg-blue-700 hover:bg-blue-900 p-2 rounded transition mt-10">
                         Logout
                     </button>
                 </nav>
