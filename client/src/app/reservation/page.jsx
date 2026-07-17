@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
 import BookingForm from "@/components/booking/BookingForm";
+import SideBarLayout from "@/components/layouts/SideBar";
 
 export default function ReservationPage() { 
     const [user, setUser] = useState(null);
@@ -43,11 +44,13 @@ export default function ReservationPage() {
         return <p>Loading...</p>
     }
     return (
-        <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">
-                Make a Reservation
-            </h1>
-            <BookingForm />
-        </div>
+        <SideBarLayout>
+            <div className="p-8">
+                <h1 className="text-2xl font-bold mb-4">
+                    Make a Reservation
+                </h1>
+                <BookingForm />
+            </div>
+        </SideBarLayout>
     )
 }

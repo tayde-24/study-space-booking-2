@@ -26,6 +26,13 @@ passport.use(
       done
     ) => {
       try {
+
+        const email = profile.emails?.[0]?.value;
+
+        if (!email) {
+          return done(new Error("No email found in Google profile"), null);
+        }
+
         let user =
           await prisma.user.findUnique({
             where: {
@@ -33,15 +40,34 @@ passport.use(
             }
           })
 
+        // if (!user) {
+        //   user = await prisma.user.create({
+        //     data: {
+        //       googleId: profile.id,
+        //       email: profile.emails[0].value,
+        //       name: profile.displayName
+        //     }
+        //   })
+        // }
         if (!user) {
           user = await prisma.user.create({
             data: {
               googleId: profile.id,
-              email: profile.emails[0].value,
+              email: email,
+              name: profile.displayName,
+              role: "USER"
+            }
+          })
+        } else {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: {
               name: profile.displayName
             }
           })
         }
+
+        
 
         return done(null, user)
 

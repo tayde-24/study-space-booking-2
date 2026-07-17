@@ -1,8 +1,46 @@
 import express from "express";
 import passport from "passport";
+import prisma from "../utils/prisma.js";
 
 const router = express.Router();
 
+// export const googleCallbackController = async (req, res) => {
+//   try {
+//     const profile = req.user;
+
+//     const email = profile.emails?.[0]?.value;
+//     if (!email) {
+//       return res.redirect("http://localhost:3000/login");
+//     }
+
+//     const user = await prisma.user.upsert({
+//       where: { email },
+//       update: { name: profile.displayName },
+//       create: {
+//         email,
+//         name: profile.displayName,
+//         role: "USER",
+//       },
+//     });
+
+//     await prisma.user.update({
+//         where: { email: "taydeluevano@gmail.com"},
+//         data: { role: "ADMIN" }
+//     })
+//     ,
+//     req.session.user = {
+//       id: user.id,
+//       email: user.email,
+//       role: user.role,
+//     };
+
+//     return res.redirect("http://localhost:3000/dashboard");
+//   } catch (err) {
+//     console.error(err);
+//     return res.redirect("http://localhost:3000/login");
+//   }
+// };
+console.log('Google callback called');
 router.get (
     '/google',
     passport.authenticate('google', {
@@ -17,11 +55,50 @@ router.get(
         failureRedirect: 'http://localhost:3000/login',
         // successRedirect: '/'
     }),
-
-    (req, res) => {
+    async (req, res) => {
+        if (req.user.role === "ADMIN") {
+            console.log('Admin user logged in');
+            return res.redirect('http://localhost:3000/admin');
+        }
         res.redirect('http://localhost:3000/dashboard');
     }
+
+    //googleCallbackController
+    // , async (req, res) => {
+    //     const profile = req.user
+
+    //     const user = await prisma.user.upsert({
+    //         where: {
+    //             email: profile.emails[0].value
+    //         },
+    //         update: {
+    //             name: profile.displayName
+    //         },
+    //         create: {
+    //             email: profile.emails[0].value,
+    //             name: profile.displayName,
+    //             role: "USER"
+    //         }
+    //     })
+    // },
+
+    // await prisma.user.update({
+    //     where: { email: "taydeluevano@gmail.com"},
+    //     data: { role: "ADMIN" }
+    // })
+    // ,
+
+    // (req, res) => {
+
+    //     req.session.user = {
+    //         id: user.id,
+    //         email: user.email,
+    //         role: user.role
+    //     }
+    //     res.redirect('http://localhost:3000/dashboard');
+    // }
 )
+
 
 router.get('/me', (req, res) => {
     
@@ -38,6 +115,32 @@ router.get('/logout', (req, res) => {
             return res.status(500).json({ error: 'Logout failed' });
         }
     });
+
+router.post("/logout", (req, res) => {
+    req.logout((err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({
+                error: "Logout failed"
+            });
+        }
+
+        req.session.destroy((err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    error: "Session destruction failed"
+                });
+            }
+
+            res.clearCookie("connect.sid");
+
+            res.json({
+                success: true
+            });
+        });
+    });
+});
 
     //This code below destroys cookie and session.
 
