@@ -44,7 +44,7 @@ export default function AdminLayout({children}) {
         // if (user.role !== "ADMIN") {
         //     router.push("/dashboard");
         // }
-    }, [user]);
+    }, []);
 
     useEffect(() => {
         if (loading) return;

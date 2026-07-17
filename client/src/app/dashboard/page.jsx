@@ -116,22 +116,39 @@ useEffect(() => {
       
       <p className="text-lg italic mt-1">Welcome, <strong>{user.name}</strong></p>
       
-      <button
+      {/* <button
       onClick={logout}
       className="mt-4 rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600 transition-colors"
     >
       Logout
-    </button>
+    </button> */}
     <div className="mt-10 mb-5">
-    <h2 className="text-xl font-bold">Your Bookings</h2>
 
+    <div className="grid grid-cols-2">
+    <h2 className="text-xl font-bold">Your Bookings</h2>
+    <Link
+      href="/reservation"
+      className="bg-blue-600 text-white px-6 py-3 
+      rounded-lg transition-colors hover:bg-blue-700
+      text-right self-end justify-self-end"
+    >
+      Reserve a Room
+    </Link>
+    </div>
+    <p className="italic text-gray-500">Total reservations made: <strong>{bookings.length}</strong></p>
+
+    <div className="mt-4 scrollbar-thin scrollbar-thumb-gray-300 
+    scrollbar-track-gray-100 overflow-y-auto max-h-[calc(100vh-280px)]
+    p-3">
     {bookings.length === 0 ? (
         <p>No bookings yet</p>
             ) : (
             bookings.map((b) => (
         <div
             key={b.id}
-            className="border p-3 rounded mt-2 grid grid-cols-1 md:grid-cols-2 gap-20 mb-4"
+            className="bg-white p-3 rounded-xl shadow-md mt-2 grid 
+            grid-cols-1 md:grid-cols-2 gap-20 mb-4 transition 
+            hover:shadow-lg hover:shadow-blue-500 duration-300"
         >
         <div className="ml-4 mt-3">
         <p className="xl:text-lg md:text-md">Building: <strong><span className="text-blue-900">{b.room?.building?.name}</span></strong></p>
@@ -175,18 +192,10 @@ useEffect(() => {
         />
       </div>
       </div>
-    ))
-  )}
+      ))
+    )}
+  </div>
     </div>
-
-    <Link
-      href="/reservation"
-      className="bg-blue-600 text-white px-6 py-3 
-      rounded-lg transition-colors hover:bg-blue-700
-      "
-    >
-      Reserve a Room
-    </Link>
 
     </div>
     </SideBarLayout>

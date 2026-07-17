@@ -428,10 +428,12 @@ return (
 
   <div className="" id="flexxx left">
       <div className="">
+        <h2 className="text-xl font-semibold ml-4">Select Building</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
             {/**LEFT: Building Selection */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Select Building</h2>
+            <div className="md:overflow-y-auto md:max-h-[calc(100vh-30px)] 
+            md:scrollbar-thin md:scrollbar-thumb-gray-300 md:scrollbar-track-gray-100">
+              
               <BuildingList
                 buildings={buildings}
                 // onSelectBuilding={setSelectedBuilding}
@@ -441,7 +443,7 @@ return (
             </div>
 
             {/**RIGHT: Preview Panel */}
-            <div>
+            <div className="">
               <BuildingPreview 
               building={selectedBuilding}
               onViewRooms={handleViewRooms}
