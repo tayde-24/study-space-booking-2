@@ -79,7 +79,21 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const bookings = await prisma.booking.findMany();
+        const now = new Date();
+
+        // const bookings = await prisma.booking.findMany();
+        const bookings = await prisma.booking.findMany({
+            where: {
+                endTime: {
+                    gte: now 
+                }
+            },
+            orderBy: {
+                startTime: 'asc'
+            }
+            
+        }
+    );
         res.json(bookings);
     } catch (error) {
         console.error("Error fetching bookings:", error);
@@ -141,7 +155,11 @@ router.get("/me", (req, res) => {
       userId: req.user.id
     },
     include: {
-      room: true
+      room: {
+        include: {
+          building: true
+        }
+      }
     },
     orderBy: {
       startTime: 'asc'
@@ -155,6 +173,68 @@ router.get("/me", (req, res) => {
   console.log("req.user:", req.user)
 });
 
+// For when the user wants to view the schedule of a room without booking
+router.get('/schedule/:roomId', async (req, res) => {
+    try {
+        const roomId = Number(req.params.roomId);
+        const bookings = await prisma.booking.findMany({
+            where: {
+                roomId: roomId
+            },
+            orderBy: {
+                startTime: 'asc'    
+            }
+        });
+
+        res.json(bookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch room schedule" });
+    }
+    
+});
+
+router.get('/week/:roomId', async (req, res) => {
+    try {
+        const roomId = Number(req.params.roomId);
+        const weekOffset = Number(req.query.weekOffset) || 0; // Get weekOffset from query params, default to 0
+
+        const today = new Date();
+
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay() + weekOffset * 7); // Set to Sunday of the current week
+        weekStart.setHours(0, 0, 0, 0); // Start of the day
+
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 7);
+        // const roomId = Number(req.params.roomId);
+        // const today = new Date();
+
+        // const weekStart = new Date(today);
+        // weekStart.setDate(today.getDate() - today.getDay()); // Set to Sunday
+        // weekStart.setHours(0, 0, 0, 0); // Start of the day
+        // const weekEnd = new Date(weekStart);
+        // weekEnd.setDate(weekStart.getDate() + 7); // End of the week
+
+        const bookings = await prisma.booking.findMany({
+            where: {
+                roomId: roomId,
+                startTime: {
+                    gte: weekStart,
+                    lt: weekEnd
+                }
+            }
+        })
+
+        res.json(bookings);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch weekly schedule" });
+    }
+})
+
+// For when the user wants to cancel a booking
 router.delete('/:id', async (req, res) => {
     try {
         const bookingId = Number(req.params.id);

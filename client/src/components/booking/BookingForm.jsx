@@ -1,21 +1,174 @@
 "use client";
 import { useEffect, useState } from "react"
 import api from "@/lib/api";
+import BuildingList from "../cards/BuildingList";
+import RoomList from "../cards/RoomList";
+import BuildingPreview from "../cards/BuildingPreview";
+import RoomSlidePanel from "../cards/RoomSlidePanel";
+import WeeklyCalendar from "../calendar/WeeklyCalendar";
+import BookingConfirmationModal from "../modals/BookingConfirmationModal";
 
 export default function BookingForm() {
     const [message, setMessage] = useState("");
-    //added more down here
-    const [bookings, setBookings] = useState([]);
-    const [buildings, setBuildings] = useState([]);
-    const [selectedBuilding, setSelectedBuilding] = useState("");
-    const [selectedRoom, setSelectedRoom] = useState("");
-    const [roomId, setRoomId] = useState("");
-    const [rooms, setRooms] = useState("");
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
+    // //added more down here
+    const [roomStatuses, setRoomStatuses] = useState([]);
+    
+    const [bookings, setBookings] = useState([])
+    const [buildings, setBuildings] = useState([])
+    const [rooms, setRooms] = useState([])
+
+
+    const [selectedBuilding, setSelectedBuilding] = useState("")
+    const [showRoomsPanel, setShowRoomsPanel] = useState(false);
+    const [selectedRoom, setSelectedRoom] = useState("")
+    const [roomId, setRoomId] = useState(null);
+
+    const [startTime, setStartTime] = useState("")
+    const [endTime, setEndTime] = useState("")
+
+    const [weeklySchedule, setWeeklySchedule] = useState([])
+    const [availability, setAvailability] = useState([])
+
+    const [selectedSlot, setSelectedSlot] = useState(null)
+    const [weekOffset, setWeekOffset] = useState(0)
+
+    const [schedule, setSchedule] = useState([]);
+
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showRoomSection, setShowRoomSection] = useState(false);
+    const [showRoomPanel, setShowRoomPanel] = useState(false);
+
+    // for (let hour = 8; hour <= 22; hour++) {
+    //   hours.push(hour);
+    // }
+    const hours = Array.from(
+      { length: 15 },
+      (_, i) => i + 8
+    );
+
+    const days = [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ];
+
+const getWeekStart = (offset = 0) => {
+  const today = new Date();
+
+  const day = today.getDay();
+  const diff = today.getDate() - day + offset *7;
+
+  const weekStart = new Date(today);
+  weekStart.setDate(diff);
+  weekStart.setHours(0, 0, 0, 0);
+
+  return weekStart;
+
+}
+
+const fetchWeeklySchedule = async () => {
+    try {
+
+      const res = await api.get(`/bookings/week/${selectedRoom?.id}`,
+        {
+          params: {
+            weekOffset
+          }
+        }
+      );
+      setWeeklySchedule(res.data);
+
+      //const res = await api.get(`/bookings/week/${selectedRoom?.id}`);
+      setWeeklySchedule(res.data);
+    } catch (error) {
+      console.error("Error fetching weekly schedule:", error);
+       //setWeeklySchedule([]);
+    }
+  }
+
+const formatForDateTimeLocal = (date) => {
+  const offset = date.getTimezoneOffset()
+
+  const localDate = new Date(
+    date.getTime() - offset * 60000
+  )
+
+  return localDate
+    .toISOString()
+    .slice(0, 16)
+}
+
+    const handleSlotClick = (dayIndex, hour) => {
+      const weekStart = getWeekStart(weekOffset);
+      const startDate = new Date(weekStart);
+      //const today = new Date();
+
+      //const startDate = new Date(today);
+      // startDate.setDate(
+      //   today.getDate() - today.getDay() + dayIndex);
+      startDate.setDate(
+        weekStart.getDate() + dayIndex);
+
+      startDate.setHours(hour, 0, 0, 0);
+      const endDate = new Date(startDate);
+      endDate.setHours(startDate.getHours() + 1);
+
+      setSelectedSlot(`${dayIndex}-${hour}`);
+
+      // setStartTime(startDate.toISOString().slice(0, 16));
+      setStartTime(formatForDateTimeLocal(startDate));
+      setEndTime(formatForDateTimeLocal(endDate));
+    }
+
+    const isSlotBooked = (dayIndex, hour) => {
+      return weeklySchedule.some(booking => {
+        const date = new Date(booking.startTime);
+
+        return (
+          date.getDay() === dayIndex &&
+          hour >= date.getHours() &&
+          hour < new Date(booking.endTime).getHours()
+        )
+      }
+        )
+    }
+
+    const isHourBooked = (dayIndex, hour) => {
+  return schedule.some(booking => {
+    const start = new Date(booking.startTime);
+    const end = new Date(booking.endTime);
+
+    const slot = new Date(start);
+    slot.setDate(start.getDate() + dayIndex);
+    slot.setHours(hour, 0, 0, 0);
+
+    return slot >= start && slot < end;
+  });
+};
+    
+
+    // const isHourBooked = (hour) => {
+    //   return schedule.some(booking => {
+    //     const start = new Date(booking.startTime).getHours();
+    //     const end = new Date(booking.endTime).getHours();
+
+    //     return hour >= start && hour < end;
+    //   })
+    // }
+
+    const isBlockStart = (booking, hour) => {
+      const start = new Date(booking.startTime);
+      return start.getHours() === hour;
+    }
+
+    const currentHour = new Date().getHours(); 
 
     const handleBooking = async (e) => {
-    e.preventDefault()
+    e?.preventDefault()
 
     // PUT FETCH CODE HERE
     const res = await fetch(
@@ -27,7 +180,7 @@ export default function BookingForm() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          roomId: Number(selectedRoom),
+          roomId: Number(selectedRoom?.id),
           startTime,
           endTime
         })
@@ -43,6 +196,8 @@ export default function BookingForm() {
     }
 
     alert("Booking created!")
+    //await res.json()
+    await fetchWeeklySchedule();
   }
 
   useEffect(() => {
@@ -58,12 +213,34 @@ export default function BookingForm() {
     }, []);
 
     //Update rooms when building changes
-    const handleBuildingChange = async (e) => {
-      const buildingId = e.target.value;
-      setSelectedBuilding(buildingId);
-      const building = buildings.find(b => b.id === Number(buildingId));
-      setRooms(building?.rooms || []);
-      setSelectedRoom(""); // Reset selected room
+    // const handleBuildingChange = async (e) => {
+    //   const buildingId = e.target.value;
+    //   setSelectedBuilding(buildingId);
+    //   const building = buildings.find(b => b.id === Number(buildingId));
+    //   setRooms(building?.rooms || []);
+    //   setSelectedRoom(""); // Reset selected room
+    // };
+    const handleBuildingChange = async (building) => {
+      //const buildingId = building.id;
+
+      setSelectedBuilding(building);
+      const res = await fetch(`http://localhost:3001/rooms?buildingId=${building.id}`);
+      //const data = await res.json;
+
+      setRooms(building.rooms || []);
+      //setRooms(Array.isArray(data) ? data : []);
+    };
+
+    const handleRoomChange = (room) => {
+      setSelectedRoom(room);
+      setShowRoomPanel(false);
+      setRoomId(room.id);
+      console.log({
+        roomId,
+        selectedRoom,
+        startTime,
+        endTime,
+      })
     };
 
     //Submit booking
@@ -75,7 +252,7 @@ export default function BookingForm() {
             "http://localhost:3001/rooms"
         )
         const data = await res.json();
-        console.log("Rooms:", data);
+        //console.log("Rooms:", data);
         setRooms(Array.isArray(data) ? data: data.rooms || [])
         
       } catch (error) {
@@ -94,8 +271,9 @@ export default function BookingForm() {
     }
 
     const fetchBookings = async () => {
+      //possibly here
       try {
-        const res = await api.get(`/bookings/room/${selectedRoom}`);
+        const res = await api.get(`/bookings/room/${selectedRoom?.id}`);
         setBookings(res.data);
 
       } catch (error) {
@@ -125,254 +303,306 @@ const formatDate = (date) => {
         hour12: true
     });
 };
-        
-// const formatDate = (date) => {
-//     return new Date(date).toLocaleString(
-//         "en-US",
-//         {
-//           dateStyle: "medium",
-//           timeStyle: "short"
-//         }
-//     );
-// }
+
+const formatTime = (date) => {
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    // hour12: true
+  })
+}
+
+const formatHour = (hour) => {
+  return new Date(
+    2026,
+    0,
+    1,
+    hour
+  ).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    // hour12: true
+  })
+}
+
+useEffect(() => {
+  if (!startTime || !endTime) {
+    //  setRoomStatuses([]);
+     setAvailability([]);
+    return;
+  }
+  const fetchAvailability = async () => {
+    try {
+      const res = await api.get(
+        `/rooms/availability`,
+        {
+          params: {
+            startTime,
+            endTime
+        }
+      }
+      );
+      console.log("Availability:", res.data);
+      setAvailability(Array.isArray(res.data) ? res.data : res.data.rooms || []);
+      //  setRoomStatuses(res.data);
+    } catch (error) {
+      console.error("Error fetching room availability:", error);
+    }
+  }
+  fetchAvailability();
+
+  console.log("startTime:", startTime)
+  console.log("endTime:", endTime)
+      
+}, [startTime, endTime]);
+
+const isRoomAvailable = (roomId) => {
+  const room = availability.find(room => room.id === Number(roomId));
+  
+  return room?.available ?? true;
+}
+
+useEffect(() => {
+  if (!selectedRoom) {
+    setSchedule([]);
+    return;
+  }
+
+  const fetchSchedule = async () => {
+    try {
+      const res = await api.get(`/bookings/schedule/${selectedRoom?.id}`);
+      setSchedule(res.data);
+    } catch (error) {
+      console.error("Error fetching room schedule:", error);
+       setSchedule([]);
+    }
+  }
+  fetchSchedule();
+
+}, [selectedRoom]);
+
+useEffect(() => {
+  if (!selectedRoom) {
+    setWeeklySchedule([]);
+    return
+  }
+  fetchWeeklySchedule()
+}, [selectedRoom, weekOffset]);
+
+useEffect(() => {
+  const fetchAvailability = async () => {
+    try {
+      const res = await api.get(`/rooms/availability`);
+      // setRoomStatuses(res.data);
+      setAvailability(Array.isArray(res.data) ? res.data : res.data.rooms || []);
+        console.log("Availability:", res.data);
+    } catch (error) {
+      console.error("Error fetching room availability:", error);
+    }
+  }
+  fetchAvailability();
+}, []);
+
+useEffect(() => {
+  if (!selectedRoom) return;
+  document.getElementById("calendar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}, [selectedRoom])
+
+const handleViewRooms = () => {
+  console.log("View Rooms clicked");
+  console.log({
+    showRoomPanel,
+    showRoomSection
+  })
+  setShowRoomSection(true);
+  setShowRoomPanel(true);
+};
 
 
+return (
+// Probably change this part
+<div className="justify-content">
 
-    // const handleBooking = async () => {
-    //     try {
-    //         await api.post("/bookings", {
-    //             userId: 7, // Replace with actual user ID
-    //             roomId: 1, // Replace with actual room ID
-    //             startTime: "2024-07-01T10:00:00Z",
-    //             endTime: "2024-07-01T12:00:00Z"
-    //         });
-
-    //         setMessage("Booking submitted successfully!");
-    //     } catch (error) {
-    //         //console.error("Error submitting booking:", error);
-    //         // console.error("Error submitting booking:", error);
-    //         setMessage(
-    //             error.response?.data?.error ||
-    //             "Failed to submit booking.");
-    //     }
-    // }    
-
-
-// return (
-//     // <div className="mt-6">
-//     //     <button onClick={handleBooking} className="bg-black text-white px-4 py-2 rounded-lg">
-//     //         Book Room 
-//     //     </button>
-//     //     {message && <p className="mt-2 text-red-500">{message}</p>}
-//     // </div>
-
-//     <form
-//       onSubmit={handleBooking}
-//       className="p-8 flex flex-col gap-4"
-//     >
-//       {/* <input
-//         type=""
-//         placeholder="Room ID"
-//         value={roomId}
-//         onChange={(e) => setRoomId(e.target.value)}
-//         className="border p-2"
-//       /> */}
-
-//       <select
-//         value={roomId}
-//         onChange={(e) => setRoomId(Number(e.target.value))}
-//         className="border p-2"
-//       >
-//         <option value="">Select Room</option>
-//         {Array.isArray(rooms) && rooms.map((room) => (
-//             <option 
-//                 key={room.id} 
-//                 value={room.id}> 
-//                     {room.name}
-//             </option>
-//         ))}
-//         </select>
-
-//       <input
-//         type="datetime-local"
-//         value={startTime}
-//         onChange={(e) => setStartTime(e.target.value)}
-//         className="border p-2"
-//       />
-
-//       <input
-//         type="datetime-local"
-//         value={endTime}
-//         onChange={(e) => setEndTime(e.target.value)}
-//         className="border p-2"
-//       />
-
-//       <button
-//         type="submit"
-//         className="bg-blue-500 text-white p-2 rounded"
-//       >
-//         Book Room
-//       </button>
-//     </form>
-// )
-
-return (<div className="space-y-6 max-w-xl">
-
+<div className="flex flex-row gap-20">
       {/* Building */}
-      <div>
 
-        <label className="block mb-2 font-semibold">
-          Building
-        </label>
+  <div className="" id="flexxx left">
+      <div className="">
+        <h2 className="text-xl font-semibold ml-4">Select Building</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+            {/**LEFT: Building Selection */}
+            <div className="md:overflow-y-auto md:max-h-[calc(100vh-30px)] 
+            md:scrollbar-thin md:scrollbar-thumb-gray-300 md:scrollbar-track-gray-100">
+              
+              <BuildingList
+                buildings={buildings}
+                // onSelectBuilding={setSelectedBuilding}
+                onSelectBuilding={handleBuildingChange}
+                selectedBuilding={selectedBuilding}
+              />
+            </div>
 
-        <select
-          value={selectedBuilding}
-          onChange={handleBuildingChange}
-          className="border rounded-lg p-2 w-full"
+            {/**RIGHT: Preview Panel */}
+            <div className="">
+              <BuildingPreview 
+              building={selectedBuilding}
+              onViewRooms={handleViewRooms}
+              />
+            </div>
+        </div> 
+
+{/* Mobile version here */}
+      <div className="lg:hidden">
+        <RoomSlidePanel
+            // isOpen={showRoomsPanel}
+            isOpen={showRoomPanel}
+            building={selectedBuilding}
+            rooms={rooms}
+            selectedRoom={selectedRoom}
+            onClose={() => setShowRoomPanel(false)}
+            onSelectRoom={(room) => {
+              handleRoomChange(room);
+              setShowRoomsPanel(false);
+            }}
         >
+          <RoomList
+            rooms={rooms}
+            selectedRoom={selectedRoom}
+            onSelectRoom={(room) =>{
+              handleRoomChange(room);
+              setShowRoomsPanel(false)
+            }}
+          />
+        </RoomSlidePanel>
 
-          <option value="">
-            Select Building
-          </option>
+        <div className="p-6" >
+        {selectedRoom && (
+          <div className="mt-6 p-4  rounded-xl 
+          bg-white shadow-lg transition duration-300
+          ">
+            <h3 className="font-semibold">
+              Selected Room
+            </h3>
 
-          {buildings.map((building) => (
+            <p>{selectedRoom.name}</p>
 
-            <option
-              key={building.id}
-              value={building.id}
-            >
-              {building.name}
-            </option>
+                {!selectedRoom ? (
+                  <div className="text-center text-gray-500 py-12">
+                    Select a room to view its schedule.
+                  </div>
+                ) : (
+                  <WeeklyCalendar
+                    selectedRoom={selectedRoom}
+                    selectedSlot={selectedSlot}
+                    weeklySchedule={weeklySchedule}
+                    weekOffset={weekOffset}
+                    setWeekOffset={setWeekOffset}
+                    handleSlotClick={handleSlotClick}
+                    isSlotBooked={isSlotBooked}
+                    isHourBooked={isHourBooked}
+                    handleBooking={handleBooking}
+                    setStartTime={setStartTime}
+                    setEndTime={setEndTime}
+                    startTime={startTime}
+                    endTime={endTime}
+                    setShowConfirmation={setShowConfirmation}
+                  />  
+                )}
 
-          ))}
+          </div>
+        )}  
 
-        </select>
-
-      </div>
-
-      {/* Room */}
-      <div>
-
-        <label className="block mb-2 font-semibold">
-          Room
-        </label>
-
-        <select
-          value={selectedRoom}
-          onChange={(e) =>
-            setSelectedRoom(e.target.value)
-          }
-          className="border rounded-lg p-2 w-full"
-          disabled={!selectedBuilding}
-        >
-
-          <option value="">
-            Select Room
-          </option>
-
-          {Array.isArray(rooms) && rooms.map((room) => (
-
-            <option
-              key={room.id}
-              value={room.id}
-            >
-              {room.name}
-            </option>
-
-          ))}
-
-        </select>
-
-      </div>
-
-      {/* Start Time */}
-      <div>
-
-        <label className="block mb-2 font-semibold">
-          Start Time
-        </label>
-
-        <input
-          type="datetime-local"
-          value={startTime}
-          onChange={(e) =>
-            setStartTime(e.target.value)
-          }
-          className="border rounded-lg p-2 w-full"
-        />
-
-      </div>
-
-      {/* End Time */}
-      <div>
-
-        <label className="block mb-2 font-semibold">
-          End Time
-        </label>
-
-        <input
-          type="datetime-local"
-          value={endTime}
-          onChange={(e) =>
-            setEndTime(e.target.value)
-          }
-          className="border rounded-lg p-2 w-full"
-        />
-
-      </div>
-
-      {/* Submit */}
-      <button
-        onClick={handleBooking}
-        className="bg-black text-white px-4 py-2 rounded-xl"
-      >
-        Reserve Room
-      </button>
-
-      {/* Message */}
-      {message && (
-        <p className="font-medium">
-          {message}
-        </p>
-      )}
-
-
-
-  <h2 className="font-bold text-lg mb-3">
-    Existing Reservations
-  </h2>
-
-  {bookings.length === 0 ? (
-    <p>No reservations found.</p>
-  ) : (
-    bookings.map((booking) => (
-      <div
-        key={booking.id}
-        className="border-b py-2"
-      >
-        <div>
-          Start:
-          {" "}
-          {new Date(
-            booking.startTime
-          ).toLocaleString()}
+        </div>
         </div>
 
-        <div>
-          End:
-          {" "}
-          {new Date(
-            booking.endTime
-          ).toLocaleString()}
-        </div>
-      </div>
-    ))
-  )}
+        
 
-  <div>
-    <p> Start: {formatDate(bookings[0]?.startTime)}</p>  
-    <p>End: {formatDate(bookings[0]?.endTime)}</p>
-  </div>
+        {/* Room Section */}
+        {showRoomSection && (
+          <div className={`hidden p-6 lg:grid grid-cols-1 lg:grid-cols-4 gap-6 
+          transition-all duration-500 ${showRoomSection ? "opacity-100 translate-y-0" :
+            "opacity-0 translate-y-4 hidden"
+          }`} id="calendar">
+          {/**LEFT: Room Selection */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg p-4">
+              <h2 className="text-xl font-semibold mb-4">
+                Available Rooms
+              </h2>
+              <RoomList
+                rooms={selectedBuilding?.rooms || []}
+                selectedRoom={selectedRoom}
+                onSelectRoom={handleRoomChange}
+              />
+            </div>
+          </div>
+
+            {/* Left side panel */}
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-xl shadow-md p-4">
+                <h2 className="text-xl font-semibold mb-4">
+                  {selectedRoom ? `Schedule for ${selectedRoom.name}` 
+                  : "Select a room"}
+                </h2>
+
+                {!selectedRoom ? (
+                  <div className="text-center text-gray-500 py-12">
+                    Select a room to view its schedule.
+                  </div>
+                ) : (
+                  
+                  <WeeklyCalendar
+                    selectedRoom={selectedRoom}
+                    selectedSlot={selectedSlot}
+                    weeklySchedule={weeklySchedule}
+                    weekOffset={weekOffset}
+                    setWeekOffset={setWeekOffset}
+                    handleSlotClick={handleSlotClick}
+                    isSlotBooked={isSlotBooked}
+                    isHourBooked={isHourBooked}
+                    handleBooking={handleBooking}
+                    setStartTime={setStartTime}
+                    setEndTime={setEndTime}
+                    startTime={startTime}
+                    endTime={endTime}
+                    setShowConfirmation={setShowConfirmation}
+                    selectedBuilding={selectedBuilding}  
+                  />
+
+                  
+                )}
+
+
+              </div>
+            </div>
+
+            
+
+        </div>
+        )}
+        
+<BookingConfirmationModal
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={async () => {
+              await handleBooking();
+              setShowConfirmation(false);
+            }}
+            selectedBuilding={selectedBuilding}
+            selectedRoom={selectedRoom}
+            startTime={startTime}
+            endTime={endTime}
+            >
+
+            
+            </BookingConfirmationModal>
+
+      </div>
+
+</div>
+
+</div>
+
 </div>
   )
 }

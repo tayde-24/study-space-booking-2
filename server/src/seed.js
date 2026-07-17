@@ -6,6 +6,11 @@ import prisma from './utils/prisma.js';
 
 async function seed() {
   try {
+    // await prisma.user.update({
+    //   where: { email: "taydeluevano@gmail.com" },
+    //   data: { role: "ADMIN" },
+    // });
+
     //Create some users
     // const user1 = await prisma.user.create({
     //   data: {
@@ -50,7 +55,7 @@ async function seed() {
       }
     });
 
-    // Create some rooms
+    // // Create some rooms
     const room1 = await prisma.room.create({
       data: {
         name: 'Luke Skywalker Room 1B',
@@ -160,10 +165,10 @@ async function seed() {
       }
     });
 
-    console.log('Database seeded successfully!');
-    // console.log('Users:', user4, user5);
-    console.log('Rooms:', room4, room5);
-    console.log('Buildings:', building1, building2);
+    // console.log('Database seeded successfully!');
+    // // console.log('Users:', user4, user5);
+    // console.log('Rooms:', room4, room5);
+    // console.log('Buildings:', building1, building2);
 
   } catch (error) {
     console.error('Error seeding database:', error);
